@@ -1,4 +1,4 @@
-# Prrrfight 🐾⚔️
+# Prrrfight 🐾⚔️. 
 
 **Prrrfight** es un videojuego de estrategia táctica por turnos (TRPG) con ambientación medieval, donde los valientes protagonistas son gatos guerreros. Desarrollado en **Unity**, diseñado específicamente para dispositivos móviles con una orientación vertical.
 
