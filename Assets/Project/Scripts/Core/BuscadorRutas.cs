@@ -10,7 +10,9 @@ public static class BuscadorRutas
 
     public static List<Vector2Int> EncontrarCamino(TableroLogico tablero, Vector2Int inicio, Vector2Int destino)
     {
-        if (!tablero.EsCoordenadaValida(destino.x, destino.y) || tablero.ObtenerUnidadEn(destino.x, destino.y) != null)
+        if (!tablero.EsCoordenadaValida(inicio.x, inicio.y) ||
+            !tablero.EsCoordenadaValida(destino.x, destino.y) ||
+            tablero.ObtenerUnidadEn(destino.x, destino.y) != null)
         {
             return null; 
         }
