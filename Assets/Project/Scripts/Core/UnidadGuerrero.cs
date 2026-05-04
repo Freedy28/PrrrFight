@@ -1,24 +1,7 @@
 using UnityEngine;
 
-public class UnidadGuerrero : MonoBehaviour
+public class UnidadGuerrero : UnidadBase
 {
-    // Aquí arrastraremos el archivo de datos (Ej: TanqueData)
-    public ClaseGuerreroSO datosDeClase;
-
-    // Variables actuales durante la partida
-    private int saludActual;
-
-    void Start()
-    {
-        // Al iniciar, la unidad toma los datos del ScriptableObject
-        saludActual = datosDeClase.puntosSaludBase;
-
-        Debug.Log($"Ha entrado al tablero un {datosDeClase.nombreClase} con {saludActual} PS.");
-    }
-
-    public void RecibirDano(int cantidad)
-    {
-        saludActual -= cantidad;
-        Debug.Log($"{datosDeClase.nombreClase} recibió daño. PS restantes: {saludActual}");
-    }
+    // UnidadGuerrero hereda datosDeClase, saludActual, Start() y RecibirDano() de UnidadBase.
+    // Añade aquí las mecánicas exclusivas de la clase Guerrero (ataques, habilidades, etc.).
 }

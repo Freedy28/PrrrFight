@@ -1,8 +1,7 @@
 using UnityEngine;
 
-// Esto agrega una opción al menú de Unity al hacer clic derecho
-[CreateAssetMenu(fileName = "NuevaClaseTirador", menuName = "Prrrfight/Clase de Tirador")]
-public class ClaseTiradorS0 : ScriptableObject
+// ScriptableObject base compartido por todas las clases de unidad (Tanque, Tirador, Luchador, Clérigo)
+public class ClaseBaseSO : ScriptableObject
 {
     [Header("Información Principal")]
     public string nombreClase; // Ej: "Tanque" o "Clérigo"

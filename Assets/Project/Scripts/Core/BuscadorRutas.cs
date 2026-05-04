@@ -40,7 +40,6 @@ public static class BuscadorRutas
                 Vector2Int vecino = actual + direccion;
 
                 if (tablero.EsCoordenadaValida(vecino.x, vecino.y) && !proveniencia.ContainsKey(vecino))
-                if (tablero.EsCoordenadaValida(vecino.x, vecino.y) && !proveniencia.ContainsKey(vecino))
                 {
                     
                     if (tablero.ObtenerUnidadEn(vecino.x, vecino.y) == null || vecino == destino)

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 274294ab19a3bef4b8bc645f14a04720, type: 3}
   m_Name: ClerigoData
-  m_EditorClassIdentifier: Assembly-CSharp::ClaseClerigoS0
+  m_EditorClassIdentifier: Assembly-CSharp::ClaseClerigoSO
   nombreClase: "Cl\xE9rigo"
   descripcionRol: "Curaci\xF3n y potenciamiento (buffs) de aliados."
   iconoClase: {fileID: 0}

@@ -7,12 +7,12 @@ public class TableroLogico : MonoBehaviour
     public int filas = 10;   // Eje Y (Alto)
 
     // La matriz bidimensional que guardará la referencia de quién ocupa cada casilla
-    private UnidadGuerrero[,] cuadricula;
+    private UnidadBase[,] cuadricula;
 
     void Awake()
     {
         // Al instanciar la clase, creamos la matriz vacía
-        cuadricula = new UnidadGuerrero[columnas, filas];
+        cuadricula = new UnidadBase[columnas, filas];
         Debug.Log($"Matriz del tablero generada: {columnas}x{filas}");
     }
 
@@ -23,7 +23,7 @@ public class TableroLogico : MonoBehaviour
     }
 
     // Registra una unidad felina en una coordenada específica
-    public bool RegistrarUnidad(UnidadGuerrero unidad, int x, int y)
+    public bool RegistrarUnidad(UnidadBase unidad, int x, int y)
     {
         // Verificamos que la casilla exista y esté vacía
         if (EsCoordenadaValida(x, y) && cuadricula[x, y] == null)
@@ -32,12 +32,12 @@ public class TableroLogico : MonoBehaviour
             // Aquí en el futuro le diremos a la Vista que mueva el modelo 3D
             return true;
         }
-        Debug.LogWarning($"Movimiento inválido: La casilla [{x},{y}] no existe o está ocupada.");
+        Debug.LogWarning($"No se pudo registrar la unidad en [{x},{y}]: la casilla no existe o está ocupada.");
         return false;
     }
 
     // Devuelve qué unidad está en cierta casilla (útil para el sistema de combate)
-    public UnidadGuerrero ObtenerUnidadEn(int x, int y)
+    public UnidadBase ObtenerUnidadEn(int x, int y)
     {
         if (EsCoordenadaValida(x, y))
         {
@@ -55,7 +55,7 @@ public class TableroLogico : MonoBehaviour
         }
     }
     // Evalúa si la geometría del movimiento está permitida según las estadísticas de la clase
-    public bool ValidarRangoMovimiento(int origenX, int origenY, int destinoX, int destinoY, ClaseGuerreroSO estadisticas)
+    public bool ValidarRangoMovimiento(int origenX, int origenY, int destinoX, int destinoY, ClaseBaseSO estadisticas)
     {
         // 1. Calculamos cuántas casillas hay de diferencia en cada eje
         int distanciaX = Mathf.Abs(destinoX - origenX);
@@ -88,7 +88,7 @@ public class TableroLogico : MonoBehaviour
     // Intenta mover una unidad de una casilla a otra
     public bool IntentarMoverUnidad(int origenX, int origenY, int destinoX, int destinoY)
     {
-        UnidadGuerrero unidad = ObtenerUnidadEn(origenX, origenY);
+        UnidadBase unidad = ObtenerUnidadEn(origenX, origenY);
 
         // Si no hay unidad en el origen, fallamos
         if (unidad == null) return false;
