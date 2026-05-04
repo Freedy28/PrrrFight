@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TanqueData
   m_EditorClassIdentifier: Assembly-CSharp::ClaseGuerreroSO
   nombreClase: Tanque
-  descripcionRol: "Primera l\xEDnea de batalla y mitigaci\xF3n de da\xF1o.\t"
+  descripcionRol: "Primera l\xEDnea de batalla y mitigaci\xF3n de da\xF1o."
   iconoClase: {fileID: 0}
   puntosSaludBase: 22
   movimientoOrtogonal: 2
