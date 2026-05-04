@@ -6,7 +6,7 @@ public class ControladorUnidadVisual : MonoBehaviour
 {
     [Header("Ajustes de Animación")]
     public float velocidadMovimiento = 5f; // Qué tan rápido camina el gato
-    public float tamañoCelda = 1f;         // Escala para convertir coordenadas lógicas a 3D
+    public float tamanoCelda = 1f;         // Escala para convertir coordenadas lógicas a 3D
 
     // Bandera para evitar que reciba nuevas órdenes mientras camina
     public bool SeEstaMoviendo { get; private set; } = false;
@@ -30,7 +30,7 @@ public class ControladorUnidadVisual : MonoBehaviour
         {
             // 1. Traducir la coordenada matemática [X, Y] a una posición física en Unity (X, 0, Z)
             // Asumimos que Y es 0 porque se mueven sobre una superficie plana
-            Vector3 posicionDestino = new Vector3(paso.x * tamañoCelda, 0, paso.y * tamañoCelda);
+            Vector3 posicionDestino = new Vector3(paso.x * tamanoCelda, 0, paso.y * tamanoCelda);
 
             // 2. Girar al personaje para que mire hacia donde camina (Opcional pero recomendado)
             transform.LookAt(posicionDestino);
