@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 274294ab19a3bef4b8bc645f14a04720, type: 3}
+  m_Name: ClerigoData
+  m_EditorClassIdentifier: Assembly-CSharp::ClaseClerigoSO
+  nombreClase: "Cl\xE9rigo"
+  descripcionRol: "Curaci\xF3n y potenciamiento (buffs) de aliados."
+  iconoClase: {fileID: 0}
+  puntosSaludBase: 16
+  movimientoOrtogonal: 2
+  movimientoDiagonal: 1
