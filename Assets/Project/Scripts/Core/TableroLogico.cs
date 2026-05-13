@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TableroLogico : MonoBehaviour
@@ -90,23 +91,38 @@ public class TableroLogico : MonoBehaviour
     {
         UnidadBase unidad = ObtenerUnidadEn(origenX, origenY);
 
-        // Si no hay unidad en el origen, fallamos
         if (unidad == null) return false;
 
-        // Validamos el rango usando nuestro nuevo método matemático
-        bool enRango = ValidarRangoMovimiento(origenX, origenY, destinoX, destinoY, unidad.datosDeClase);
+        // 1. Validamos matemáticamente primero (es rápido y descarta clics erróneos de inmediato)
+        bool enRangoMatematico = ValidarRangoMovimiento(origenX, origenY, destinoX, destinoY, unidad.datosDeClase);
 
-        if (enRango && EsCoordenadaValida(destinoX, destinoY) && cuadricula[destinoX, destinoY] == null)
+        if (!enRangoMatematico)
         {
-            // Efectuamos el movimiento lógico
+            Debug.LogWarning($"Movimiento inválido para {unidad.datosDeClase.nombreClase}. Fuera de sus reglas de diseño.");
+            return false;
+        }
+
+        // 2. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding mejorado
+        Vector2Int inicio = new Vector2Int(origenX, origenY);
+        Vector2Int destino = new Vector2Int(destinoX, destinoY);
+
+        List<Vector2Int> ruta = BuscadorRutas.EncontrarCamino(this, inicio, destino, unidad.datosDeClase);
+
+        // Si la ruta no es nula y tiene pasos, el camino está totalmente despejado
+        if (ruta != null && ruta.Count > 0)
+        {
+            // Efectuamos el movimiento en la memoria del tablero
             cuadricula[destinoX, destinoY] = unidad;
             cuadricula[origenX, origenY] = null;
 
-            Debug.Log($"{unidad.datosDeClase.nombreClase} se movió a [{destinoX},{destinoY}]");
+            Debug.Log($"{unidad.datosDeClase.nombreClase} se movió lógicamente a [{destinoX},{destinoY}]");
+
+            // TODO: En el siguiente paso arquitectónico, aquí pasaremos la variable 'ruta' 
+            // a ControladorUnidadVisual.IniciarMovimiento() para que inicie la corrutina de animación.
             return true;
         }
 
-        Debug.LogWarning($"Movimiento inválido para {unidad.datosDeClase.nombreClase}. Fuera de rango o casilla ocupada.");
+        Debug.LogWarning($"El camino está bloqueado para {unidad.datosDeClase.nombreClase}.");
         return false;
-    }
+    }   
 }
