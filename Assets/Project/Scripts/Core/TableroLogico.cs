@@ -89,6 +89,13 @@ public class TableroLogico : MonoBehaviour
     // Intenta mover una unidad de una casilla a otra
     public bool IntentarMoverUnidad(int origenX, int origenY, int destinoX, int destinoY)
     {
+        // 0. Validar que ambas coordenadas están dentro del tablero antes de cualquier cálculo
+        if (!EsCoordenadaValida(origenX, origenY) || !EsCoordenadaValida(destinoX, destinoY))
+        {
+            Debug.LogWarning($"Coordenadas fuera del tablero: origen [{origenX},{origenY}] o destino [{destinoX},{destinoY}].");
+            return false;
+        }
+
         UnidadBase unidad = ObtenerUnidadEn(origenX, origenY);
 
         if (unidad == null) return false;
@@ -102,11 +109,18 @@ public class TableroLogico : MonoBehaviour
             return false;
         }
 
-        // 2. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding mejorado
+        // 2. Determinar el tipo de movimiento para que el pathfinding use las direcciones correctas
+        int distanciaX = Mathf.Abs(destinoX - origenX);
+        int distanciaY = Mathf.Abs(destinoY - origenY);
+        TipoMovimiento tipoMovimiento = (distanciaX == 0 || distanciaY == 0)
+            ? TipoMovimiento.Ortogonal
+            : TipoMovimiento.Diagonal;
+
+        // 3. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding mejorado
         Vector2Int inicio = new Vector2Int(origenX, origenY);
         Vector2Int destino = new Vector2Int(destinoX, destinoY);
 
-        List<Vector2Int> ruta = BuscadorRutas.EncontrarCamino(this, inicio, destino, unidad.datosDeClase);
+        List<Vector2Int> ruta = BuscadorRutas.EncontrarCamino(this, inicio, destino, unidad.datosDeClase, tipoMovimiento);
 
         // Si la ruta no es nula y tiene pasos, el camino está totalmente despejado
         if (ruta != null && ruta.Count > 0)

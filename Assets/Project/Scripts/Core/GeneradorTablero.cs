@@ -40,7 +40,7 @@ public class GeneradorTablero : MonoBehaviour
                 MeshRenderer render = nuevaCasilla.GetComponent<MeshRenderer>();
                 if (render != null)
                 {
-                    render.material = (x + y) % 2 == 0 ? materialClaro : materialOscuro;
+                    render.sharedMaterial = (x + y) % 2 == 0 ? materialClaro : materialOscuro;
                 }
 
                 // IMPORTANTE: Asegurarnos de que tenga un Collider para el Raycast

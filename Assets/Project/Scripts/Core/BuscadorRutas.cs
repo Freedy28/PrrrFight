@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TipoMovimiento { Ortogonal, Diagonal }
+
 public static class BuscadorRutas
 {
     // Separamos las direcciones para poder evaluarlas según la clase del gato
@@ -14,8 +16,9 @@ public static class BuscadorRutas
         new Vector2Int(-1, -1), new Vector2Int(-1, 1)
     };
 
-    // Actualizamos la firma para recibir las estadísticas de la unidad
-    public static List<Vector2Int> EncontrarCamino(TableroLogico tablero, Vector2Int inicio, Vector2Int destino, ClaseBaseSO estadisticas)
+    // Firma actualizada: recibe el tipo de movimiento para explorar solo las
+    // direcciones correctas y respetar el límite del stat correspondiente.
+    public static List<Vector2Int> EncontrarCamino(TableroLogico tablero, Vector2Int inicio, Vector2Int destino, ClaseBaseSO estadisticas, TipoMovimiento tipoMovimiento)
     {
         if (!tablero.EsCoordenadaValida(inicio.x, inicio.y) ||
             !tablero.EsCoordenadaValida(destino.x, destino.y) ||
@@ -24,13 +27,15 @@ public static class BuscadorRutas
             return null;
         }
 
-        // 1. Configurar las direcciones permitidas para esta clase específica
-        List<Vector2Int> direccionesPermitidas = new List<Vector2Int>();
-        if (estadisticas.movimientoOrtogonal > 0) direccionesPermitidas.AddRange(dirOrtogonales);
-        if (estadisticas.movimientoDiagonal > 0) direccionesPermitidas.AddRange(dirDiagonales);
+        // 1. Usar solo el conjunto de direcciones que corresponde al tipo de movimiento validado
+        Vector2Int[] direccionesPermitidas = (tipoMovimiento == TipoMovimiento.Ortogonal)
+            ? dirOrtogonales
+            : dirDiagonales;
 
-        // 2. Definir la distancia máxima que el BFS tiene permitido explorar
-        int maxPasos = Mathf.Max(estadisticas.movimientoOrtogonal, estadisticas.movimientoDiagonal);
+        // 2. Limitar el alcance según el stat que aplica al tipo de movimiento
+        int maxPasos = (tipoMovimiento == TipoMovimiento.Ortogonal)
+            ? estadisticas.movimientoOrtogonal
+            : estadisticas.movimientoDiagonal;
 
         Queue<Vector2Int> frontera = new Queue<Vector2Int>();
         Dictionary<Vector2Int, Vector2Int> proveniencia = new Dictionary<Vector2Int, Vector2Int>();

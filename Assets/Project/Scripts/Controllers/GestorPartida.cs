@@ -59,6 +59,11 @@ public class GestorPartida : MonoBehaviour
         // y también detecta el primer toque (tap) en la pantalla de un dispositivo Android
         if (Input.GetMouseButtonDown(0))
         {
+            // Evitamos que los clics sobre elementos de UI disparen un Raycast de escena
+            if (UnityEngine.EventSystems.EventSystem.current != null &&
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+                return;
+
             Vector2Int coordenadaTocada = ConvertirToqueACoordenada(Input.mousePosition);
 
             // Verificamos que el toque no devolviera la coordenada inválida (-1, -1)
@@ -78,15 +83,15 @@ public class GestorPartida : MonoBehaviour
         // 2. Disparamos el rayo hacia la escena 3D
         if (Physics.Raycast(rayo, out impacto))
         {
-            // 3. Obtenemos el punto exacto (X, Y, Z) donde el rayo chocó con un Collider
-            Vector3 puntoImpacto = impacto.point;
+            // 3. Convertimos el punto de impacto al espacio local del tablero para soportar
+            //    cualquier posición, rotación o escala del GameObject del tablero
+            Vector3 puntoLocal = tablero.transform.InverseTransformPoint(impacto.point);
 
-            // 4. Traducción Inversa: Transformamos el espacio 3D a la cuadrícula 2D de tu TableroLogico
-            // Como tu ControladorUnidadVisual usa (X, 0, Z), dividimos entre el tamaño de la celda y redondeamos
-            int xLogica = Mathf.RoundToInt(puntoImpacto.x / tamanoCelda);
-            int yLogica = Mathf.RoundToInt(puntoImpacto.z / tamanoCelda);
+            // 4. Traducción Inversa: Transformamos el espacio local a la cuadrícula 2D de TableroLogico
+            int xLogica = Mathf.RoundToInt(puntoLocal.x / tamanoCelda);
+            int yLogica = Mathf.RoundToInt(puntoLocal.z / tamanoCelda);
 
-            // 5. Verificamos con tu clase TableroLogico que no hayamos tocado fuera de los límites
+            // 5. Verificamos con TableroLogico que no hayamos tocado fuera de los límites
             if (tablero.EsCoordenadaValida(xLogica, yLogica))
             {
                 return new Vector2Int(xLogica, yLogica);
