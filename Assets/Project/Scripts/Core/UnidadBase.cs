@@ -6,6 +6,9 @@ public class UnidadBase : MonoBehaviour
     // Cada unidad tiene datos de clase asignados desde el Inspector
     public ClaseBaseSO datosDeClase;
 
+    // Coordenada inicial dentro del tablero lógico (asignar desde el Inspector)
+    public Vector2Int coordenadaInicial;
+
     // Puntos de salud actuales durante la partida
     protected int saludActual;
 

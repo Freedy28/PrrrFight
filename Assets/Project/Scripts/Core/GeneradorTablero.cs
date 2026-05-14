@@ -19,6 +19,14 @@ public class GeneradorTablero : MonoBehaviour
 
     public void GenerarTableroVisual()
     {
+        // Validar que el prefab esté asignado antes de proceder
+        if (prefabCasilla == null)
+        {
+            Debug.LogError("GeneradorTablero: prefabCasilla no está asignado. Abortando generación del tablero.", this);
+            enabled = false;
+            return;
+        }
+
         // Limpiamos el tablero si ya existía algo (útil para prototipar)
         foreach (Transform hijo in transform)
         {
@@ -29,11 +37,11 @@ public class GeneradorTablero : MonoBehaviour
         {
             for (int y = 0; y < alto; y++)
             {
-                // Calculamos la posición física (X, 0, Z)
-                Vector3 posicion = new Vector3(x * tamanoCelda, 0, y * tamanoCelda);
-
-                // Instanciamos la casilla
-                GameObject nuevaCasilla = Instantiate(prefabCasilla, posicion, Quaternion.identity, this.transform);
+                // Instanciamos la casilla como hijo del tablero y usamos posición local
+                // para que el tablero pueda moverse/rotarse sin desalinear la grilla
+                GameObject nuevaCasilla = Instantiate(prefabCasilla, this.transform);
+                nuevaCasilla.transform.localPosition = new Vector3(x * tamanoCelda, 0, y * tamanoCelda);
+                nuevaCasilla.transform.localRotation = Quaternion.identity;
                 nuevaCasilla.name = $"Casilla_{x}_{y}";
 
                 // Aplicamos color tipo ajedrez si tenemos los materiales

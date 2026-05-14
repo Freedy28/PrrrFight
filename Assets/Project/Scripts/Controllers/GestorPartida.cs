@@ -34,14 +34,34 @@ public class GestorPartida : MonoBehaviour
     private UnidadBase unidadSeleccionada;
     private Vector2Int coordenadaOrigen;
 
+    // Jugador actual independiente del estado de animación (1 o 2)
+    private int jugadorActual = 1;
+
     void Start()
     {
         // Si no asignas una cámara en el inspector, busca la Main Camera automáticamente
         if (camaraPrincipal == null) camaraPrincipal = Camera.main;
 
+        // Registramos las unidades ya presentes en la escena antes de permitir input
+        RegistrarUnidadesIniciales();
+
         estadoActual = EstadoJuego.TurnoJugador1;
         faseActual = FaseTurno.EsperandoSeleccion;
         Debug.Log("Inicia la partida. Turno del Jugador 1.");
+    }
+
+    // Busca todos los UnidadBase en la escena y los registra en el tablero lógico
+    private void RegistrarUnidadesIniciales()
+    {
+        UnidadBase[] unidades = FindObjectsByType<UnidadBase>(FindObjectsSortMode.None);
+        foreach (UnidadBase unidad in unidades)
+        {
+            bool registrada = tablero.RegistrarUnidad(unidad, unidad.coordenadaInicial.x, unidad.coordenadaInicial.y);
+            if (registrada)
+                Debug.Log($"Unidad '{unidad.datosDeClase?.nombreClase}' registrada en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}].");
+            else
+                Debug.LogWarning($"No se pudo registrar '{unidad.datosDeClase?.nombreClase}' en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}]: coordenada inválida u ocupada.");
+        }
     }
 
     void Update()
@@ -55,16 +75,39 @@ public class GestorPartida : MonoBehaviour
 
     private void DetectarInput()
     {
-        // GetMouseButtonDown(0) es mágico en Unity: detecta el clic izquierdo en PC
-        // y también detecta el primer toque (tap) en la pantalla de un dispositivo Android
-        if (Input.GetMouseButtonDown(0))
+        Vector3 posicionInput = Vector3.zero;
+        bool inputDetectado = false;
+
+        // Detectamos toque táctil (Android/iOS) con fingerId correcto para el EventSystem
+        if (Input.touchCount > 0)
+        {
+            Touch toque = Input.GetTouch(0);
+            if (toque.phase == TouchPhase.Began)
+            {
+                // Pasamos el fingerId para que la detección de UI funcione en móvil
+                if (UnityEngine.EventSystems.EventSystem.current != null &&
+                    UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(toque.fingerId))
+                    return;
+
+                posicionInput = toque.position;
+                inputDetectado = true;
+            }
+        }
+        // GetMouseButtonDown(0) en PC/Editor
+        else if (Input.GetMouseButtonDown(0))
         {
             // Evitamos que los clics sobre elementos de UI disparen un Raycast de escena
             if (UnityEngine.EventSystems.EventSystem.current != null &&
                 UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
                 return;
 
-            Vector2Int coordenadaTocada = ConvertirToqueACoordenada(Input.mousePosition);
+            posicionInput = Input.mousePosition;
+            inputDetectado = true;
+        }
+
+        if (inputDetectado)
+        {
+            Vector2Int coordenadaTocada = ConvertirToqueACoordenada(posicionInput);
 
             // Verificamos que el toque no devolviera la coordenada inválida (-1, -1)
             if (coordenadaTocada.x != -1)
@@ -146,7 +189,9 @@ public class GestorPartida : MonoBehaviour
                 // Limpiamos variables
                 unidadSeleccionada = null;
 
-                // Por ahora, simularemos que la animación de caminar fue instantánea y pasamos de turno
+                // Por ahora, simularemos que la animación de caminar fue instantánea y pasamos de turno.
+                // CambiarTurno usa jugadorActual (no estadoActual) para que el estado AnimandoAccion
+                // no rompa la lógica de alternancia.
                 CambiarTurno();
             }
             else
@@ -159,7 +204,10 @@ public class GestorPartida : MonoBehaviour
     // Método para alternar el flujo del juego
     public void CambiarTurno()
     {
-        estadoActual = (estadoActual == EstadoJuego.TurnoJugador1) ? EstadoJuego.TurnoJugador2 : EstadoJuego.TurnoJugador1;
+        // Alternamos basándonos en jugadorActual, no en estadoActual, para que el estado
+        // AnimandoAccion no interfiera con la lógica de cambio de turno.
+        jugadorActual = (jugadorActual == 1) ? 2 : 1;
+        estadoActual = (jugadorActual == 1) ? EstadoJuego.TurnoJugador1 : EstadoJuego.TurnoJugador2;
         faseActual = FaseTurno.EsperandoSeleccion;
         Debug.Log($"<color=cyan>--- CAMBIO DE TURNO: {estadoActual} ---</color>");
     }

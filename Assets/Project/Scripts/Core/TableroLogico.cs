@@ -109,14 +109,21 @@ public class TableroLogico : MonoBehaviour
             return false;
         }
 
-        // 2. Determinar el tipo de movimiento para que el pathfinding use las direcciones correctas
+        // 2b. Verificar que el destino no esté ocupado antes de llamar al pathfinding
+        if (ObtenerUnidadEn(destinoX, destinoY) != null)
+        {
+            Debug.LogWarning($"La casilla destino [{destinoX},{destinoY}] ya está ocupada.");
+            return false;
+        }
+
+        // 3. Determinar el tipo de movimiento para que el pathfinding use las direcciones correctas
         int distanciaX = Mathf.Abs(destinoX - origenX);
         int distanciaY = Mathf.Abs(destinoY - origenY);
         TipoMovimiento tipoMovimiento = (distanciaX == 0 || distanciaY == 0)
             ? TipoMovimiento.Ortogonal
             : TipoMovimiento.Diagonal;
 
-        // 3. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding mejorado
+        // 4. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding mejorado
         Vector2Int inicio = new Vector2Int(origenX, origenY);
         Vector2Int destino = new Vector2Int(destinoX, destinoY);
 
@@ -136,7 +143,7 @@ public class TableroLogico : MonoBehaviour
             return true;
         }
 
-        Debug.LogWarning($"El camino está bloqueado para {unidad.datosDeClase.nombreClase}.");
+        Debug.LogWarning($"La ruta hacia [{destinoX},{destinoY}] está bloqueada por obstáculos intermedios para {unidad.datosDeClase.nombreClase}.");
         return false;
     }   
 }
