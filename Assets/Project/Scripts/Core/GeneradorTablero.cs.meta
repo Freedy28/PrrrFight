@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 04afdb39b83667240ba066a443bebf8c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - prefabCasilla: {fileID: 2320349901587710016, guid: 009e827af9403174f808ea442927b713, type: 3}
+  - materialClaro: {fileID: 2100000, guid: f5a2685eb4615394084656f33fc3f9ff, type: 2}
+  - materialOscuro: {fileID: 2100000, guid: 543c1c956eaa76c49ae87352d23d1abf, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
