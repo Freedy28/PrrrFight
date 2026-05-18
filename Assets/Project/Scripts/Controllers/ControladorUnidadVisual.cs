@@ -67,6 +67,6 @@ public class ControladorUnidadVisual : MonoBehaviour
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
     private void RegistrarLogMovimientoFinalizado()
     {
-        UnityEngine.Debug.Log("El personaje ha llegado a su destino.");
+        Debug.Log("El personaje ha llegado a su destino.");
     }
 }
