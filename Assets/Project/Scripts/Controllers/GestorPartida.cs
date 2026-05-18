@@ -29,7 +29,7 @@ public class GestorPartida : MonoBehaviour
     public float tamanoCelda = 1f; // Debe ser el mismo que tienes en tu ControladorUnidadVisual
 
     [Header("Input / Raycast")]
-    public LayerMask mascaraTablero = ~0;
+    public LayerMask mascaraTablero = 0;
 
     [Header("Estado Actual (Solo lectura)")]
     public EstadoJuego estadoActual;
@@ -60,6 +60,11 @@ public class GestorPartida : MonoBehaviour
 
         // Si no asignas una cámara en el inspector, busca la Main Camera automáticamente
         if (camaraPrincipal == null) camaraPrincipal = Camera.main;
+
+        if (mascaraTablero.value == 0)
+        {
+            mascaraTablero = 1 << tablero.gameObject.layer;
+        }
 
         if (controladorVisual != null)
             controladorVisual.MovimientoFinalizado += OnMovimientoVisualFinalizado;
@@ -262,8 +267,9 @@ public class GestorPartida : MonoBehaviour
         int pasos = Mathf.Max(Mathf.Abs(deltaX), Mathf.Abs(deltaY));
         if (pasos <= 0) return null;
 
-        int pasoX = deltaX == 0 ? 0 : (deltaX > 0 ? 1 : -1);
-        int pasoY = deltaY == 0 ? 0 : (deltaY > 0 ? 1 : -1);
+        bool esOrtogonal = deltaX == 0 || deltaY == 0;
+        int pasoX = TableroLogico.CalcularPaso(deltaX, esOrtogonal);
+        int pasoY = TableroLogico.CalcularPaso(deltaY, esOrtogonal);
 
         List<Vector2Int> ruta = new List<Vector2Int>(pasos);
         Vector2Int actual = origen;

@@ -172,8 +172,8 @@ public class TableroLogico : MonoBehaviour
         int pasos = Mathf.Max(Mathf.Abs(deltaX), Mathf.Abs(deltaY));
         if (pasos <= 0) return null;
 
-        int pasoX = tipoMovimiento == TipoMovimiento.Ortogonal ? (deltaX == 0 ? 0 : (deltaX > 0 ? 1 : -1)) : (deltaX > 0 ? 1 : -1);
-        int pasoY = tipoMovimiento == TipoMovimiento.Ortogonal ? (deltaY == 0 ? 0 : (deltaY > 0 ? 1 : -1)) : (deltaY > 0 ? 1 : -1);
+        int pasoX = CalcularPaso(deltaX, tipoMovimiento == TipoMovimiento.Ortogonal);
+        int pasoY = CalcularPaso(deltaY, tipoMovimiento == TipoMovimiento.Ortogonal);
 
         var ruta = new List<Vector2Int>(pasos);
         Vector2Int actual = inicio;
@@ -192,5 +192,11 @@ public class TableroLogico : MonoBehaviour
         }
 
         return ruta;
+    }
+
+    public static int CalcularPaso(int delta, bool permitirCero)
+    {
+        if (permitirCero && delta == 0) return 0;
+        return delta > 0 ? 1 : -1;
     }
 } 
