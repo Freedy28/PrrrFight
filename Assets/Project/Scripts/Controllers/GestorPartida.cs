@@ -262,24 +262,13 @@ public class GestorPartida : MonoBehaviour
 
     private List<Vector2Int> ConstruirRutaVisualSimple(Vector2Int origen, Vector2Int destino)
     {
-        int deltaX = destino.x - origen.x;
-        int deltaY = destino.y - origen.y;
-        int pasos = Mathf.Max(Mathf.Abs(deltaX), Mathf.Abs(deltaY));
-        if (pasos <= 0) return null;
+        int distanciaX = Mathf.Abs(destino.x - origen.x);
+        int distanciaY = Mathf.Abs(destino.y - origen.y);
+        TipoMovimiento tipoMovimiento = (distanciaX == 0 || distanciaY == 0)
+            ? TipoMovimiento.Ortogonal
+            : TipoMovimiento.Diagonal;
 
-        bool esOrtogonal = deltaX == 0 || deltaY == 0;
-        int pasoX = TableroLogico.CalcularPaso(deltaX, esOrtogonal);
-        int pasoY = TableroLogico.CalcularPaso(deltaY, esOrtogonal);
-
-        List<Vector2Int> ruta = new List<Vector2Int>(pasos);
-        Vector2Int actual = origen;
-        for (int i = 0; i < pasos; i++)
-        {
-            actual = new Vector2Int(actual.x + pasoX, actual.y + pasoY);
-            ruta.Add(actual);
-        }
-
-        return ruta;
+        return TableroLogico.ConstruirRutaLineal(origen, destino, tipoMovimiento);
     }
 
     private Vector2Int ObtenerCoordenadaDesdeTransform(Vector3 posicionMundo)

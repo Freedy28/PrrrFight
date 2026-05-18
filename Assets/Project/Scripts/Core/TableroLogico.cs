@@ -166,9 +166,39 @@ public class TableroLogico : MonoBehaviour
 
     private List<Vector2Int> ConstruirRutaLinealSiLibre(Vector2Int inicio, Vector2Int destino, TipoMovimiento tipoMovimiento)
     {
+        List<Vector2Int> ruta = ConstruirRutaLineal(inicio, destino, tipoMovimiento);
+        if (ruta == null) return null;
+
+        foreach (Vector2Int paso in ruta)
+        {
+            if (!EsCoordenadaValida(paso.x, paso.y))
+                return null;
+
+            if (paso != destino && cuadricula[paso.x, paso.y] != null)
+                return null;
+        }
+
+        return ruta;
+    }
+
+    /// <summary>
+    /// Calcula el paso unitario de avance según el delta de coordenada.
+    /// </summary>
+    /// <param name="delta">Diferencia entre destino y origen para un eje.</param>
+    /// <param name="permitirCero">Si true, devuelve 0 cuando delta es 0 (movimiento ortogonal).</param>
+    public static int CalcularPaso(int delta, bool permitirCero)
+    {
+        if (permitirCero && delta == 0) return 0;
+        return delta > 0 ? 1 : -1;
+    }
+
+    /// <summary>
+    /// Construye la ruta lineal (sin validación de obstáculos) entre origen y destino.
+    /// </summary>
+    public static List<Vector2Int> ConstruirRutaLineal(Vector2Int inicio, Vector2Int destino, TipoMovimiento tipoMovimiento)
+    {
         int deltaX = destino.x - inicio.x;
         int deltaY = destino.y - inicio.y;
-
         int pasos = Mathf.Max(Mathf.Abs(deltaX), Mathf.Abs(deltaY));
         if (pasos <= 0) return null;
 
@@ -177,26 +207,12 @@ public class TableroLogico : MonoBehaviour
 
         var ruta = new List<Vector2Int>(pasos);
         Vector2Int actual = inicio;
-
         for (int i = 0; i < pasos; i++)
         {
             actual = new Vector2Int(actual.x + pasoX, actual.y + pasoY);
-
-            if (!EsCoordenadaValida(actual.x, actual.y))
-                return null;
-
-            if (actual != destino && cuadricula[actual.x, actual.y] != null)
-                return null;
-
             ruta.Add(actual);
         }
 
         return ruta;
-    }
-
-    public static int CalcularPaso(int delta, bool permitirCero)
-    {
-        if (permitirCero && delta == 0) return 0;
-        return delta > 0 ? 1 : -1;
     }
 } 
