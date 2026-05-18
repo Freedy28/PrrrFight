@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 // Estados principales del flujo del juego
 public enum EstadoJuego
@@ -20,11 +22,14 @@ public class GestorPartida : MonoBehaviour
 {
     [Header("Referencias")]
     public TableroLogico tablero;
-    // public ControladorUnidadVisual controladorVisual; // Lo descomentaremos en la siguiente fase
+    public ControladorUnidadVisual controladorVisual;
     public Camera camaraPrincipal;
 
     [Header("Configuración Visual")]
     public float tamanoCelda = 1f; // Debe ser el mismo que tienes en tu ControladorUnidadVisual
+
+    [Header("Input / Raycast")]
+    public LayerMask mascaraTablero = 0;
 
     [Header("Estado Actual (Solo lectura)")]
     public EstadoJuego estadoActual;
@@ -37,30 +42,76 @@ public class GestorPartida : MonoBehaviour
     // Jugador actual independiente del estado de animación (1 o 2)
     private int jugadorActual = 1;
 
+    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+    private static void LogDev(string mensaje)
+    {
+        UnityEngine.Debug.Log(mensaje);
+    }
+
+    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+    private static void LogWarningDev(string mensaje)
+    {
+        UnityEngine.Debug.LogWarning(mensaje);
+    }
+
     void Start()
     {
+        ValidarReferenciasEscena();
+
         // Si no asignas una cámara en el inspector, busca la Main Camera automáticamente
         if (camaraPrincipal == null) camaraPrincipal = Camera.main;
+
+        if (mascaraTablero.value == 0)
+        {
+            // Incluye capa del tablero y Default para cubrir casillas hijas sin capa personalizada.
+            mascaraTablero = (1 << tablero.gameObject.layer) | 1;
+        }
+
+        if (controladorVisual != null)
+            controladorVisual.MovimientoFinalizado += OnMovimientoVisualFinalizado;
 
         // Registramos las unidades ya presentes en la escena antes de permitir input
         RegistrarUnidadesIniciales();
 
         estadoActual = EstadoJuego.TurnoJugador1;
         faseActual = FaseTurno.EsperandoSeleccion;
-        Debug.Log("Inicia la partida. Turno del Jugador 1.");
+        LogDev("Inicia la partida. Turno del Jugador 1.");
+    }
+
+    private void OnDestroy()
+    {
+        if (controladorVisual != null)
+            controladorVisual.MovimientoFinalizado -= OnMovimientoVisualFinalizado;
     }
 
     // Busca todos los UnidadBase en la escena y los registra en el tablero lógico
     private void RegistrarUnidadesIniciales()
     {
         UnidadBase[] unidades = FindObjectsByType<UnidadBase>(FindObjectsSortMode.None);
+        HashSet<Vector2Int> coordenadasUsadas = new HashSet<Vector2Int>();
+
         foreach (UnidadBase unidad in unidades)
         {
+            Vector2Int coordenadaDetectada = ObtenerCoordenadaDesdeTransform(unidad.transform.position);
+            unidad.coordenadaInicial = coordenadaDetectada;
+
+            if (!tablero.EsCoordenadaValida(unidad.coordenadaInicial.x, unidad.coordenadaInicial.y))
+            {
+                LogWarningDev($"'{unidad.name}' quedó fuera del tablero con coordenada [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}].");
+                continue;
+            }
+
+            if (!coordenadasUsadas.Add(unidad.coordenadaInicial))
+            {
+                LogWarningDev($"Coordenada duplicada detectada en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}] para '{unidad.name}'.");
+                continue;
+            }
+
             bool registrada = tablero.RegistrarUnidad(unidad, unidad.coordenadaInicial.x, unidad.coordenadaInicial.y);
             if (registrada)
-                Debug.Log($"Unidad '{unidad.datosDeClase?.nombreClase}' registrada en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}].");
+                LogDev($"Unidad '{unidad.datosDeClase?.nombreClase}' registrada en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}].");
             else
-                Debug.LogWarning($"No se pudo registrar '{unidad.datosDeClase?.nombreClase}' en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}]: coordenada inválida u ocupada.");
+                LogWarningDev($"No se pudo registrar '{unidad.datosDeClase?.nombreClase}' en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}]: coordenada inválida u ocupada.");
         }
     }
 
@@ -75,46 +126,43 @@ public class GestorPartida : MonoBehaviour
 
     private void DetectarInput()
     {
-        Vector3 posicionInput = Vector3.zero;
-        bool inputDetectado = false;
+        if (!TryObtenerPosicionInput(out Vector3 posicionInput))
+            return;
 
-        // Detectamos toque táctil (Android/iOS) con fingerId correcto para el EventSystem
+        Vector2Int coordenadaTocada = ConvertirToqueACoordenada(posicionInput);
+
+        // Verificamos que el toque no devolviera la coordenada inválida (-1, -1)
+        if (coordenadaTocada.x != -1)
+        {
+            ProcesarToque(coordenadaTocada);
+        }
+    }
+
+    private bool TryObtenerPosicionInput(out Vector3 posicionInput)
+    {
+        posicionInput = Vector3.zero;
+
         if (Input.touchCount > 0)
         {
             Touch toque = Input.GetTouch(0);
-            if (toque.phase == TouchPhase.Began)
-            {
-                // Pasamos el fingerId para que la detección de UI funcione en móvil
-                if (UnityEngine.EventSystems.EventSystem.current != null &&
-                    UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(toque.fingerId))
-                    return;
+            if (toque.phase != TouchPhase.Began) return false;
 
-                posicionInput = toque.position;
-                inputDetectado = true;
-            }
-        }
-        // GetMouseButtonDown(0) en PC/Editor
-        else if (Input.GetMouseButtonDown(0))
-        {
-            // Evitamos que los clics sobre elementos de UI disparen un Raycast de escena
             if (UnityEngine.EventSystems.EventSystem.current != null &&
-                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-                return;
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(toque.fingerId))
+                return false;
 
-            posicionInput = Input.mousePosition;
-            inputDetectado = true;
+            posicionInput = toque.position;
+            return true;
         }
 
-        if (inputDetectado)
-        {
-            Vector2Int coordenadaTocada = ConvertirToqueACoordenada(posicionInput);
+        if (!Input.GetMouseButtonDown(0)) return false;
 
-            // Verificamos que el toque no devolviera la coordenada inválida (-1, -1)
-            if (coordenadaTocada.x != -1)
-            {
-                ProcesarToque(coordenadaTocada);
-            }
-        }
+        if (UnityEngine.EventSystems.EventSystem.current != null &&
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            return false;
+
+        posicionInput = Input.mousePosition;
+        return true;
     }
 
     private Vector2Int ConvertirToqueACoordenada(Vector3 posicionPantalla)
@@ -124,7 +172,7 @@ public class GestorPartida : MonoBehaviour
         RaycastHit impacto;
 
         // 2. Disparamos el rayo hacia la escena 3D
-        if (Physics.Raycast(rayo, out impacto))
+        if (Physics.Raycast(rayo, out impacto, Mathf.Infinity, mascaraTablero))
         {
             // 3. Convertimos el punto de impacto al espacio local del tablero para soportar
             //    cualquier posición, rotación o escala del GameObject del tablero
@@ -158,11 +206,11 @@ public class GestorPartida : MonoBehaviour
                 coordenadaOrigen = coordenada;
                 faseActual = FaseTurno.UnidadSeleccionada;
 
-                Debug.Log($"<color=green>Seleccionaste:</color> {unidadTocada.datosDeClase.nombreClase} en [{coordenada.x}, {coordenada.y}]");
+                LogDev($"<color=green>Seleccionaste:</color> {unidadTocada.datosDeClase.nombreClase} en [{coordenada.x}, {coordenada.y}]");
             }
             else
             {
-                Debug.Log("Tocaste una casilla vacía. Selecciona a un gato primero.");
+                LogDev("Tocaste una casilla vacía. Selecciona a un gato primero.");
             }
         }
         else if (faseActual == FaseTurno.UnidadSeleccionada)
@@ -172,7 +220,7 @@ public class GestorPartida : MonoBehaviour
             {
                 unidadSeleccionada = null;
                 faseActual = FaseTurno.EsperandoSeleccion;
-                Debug.Log("Unidad deseleccionada.");
+                LogDev("Unidad deseleccionada.");
                 return;
             }
 
@@ -183,21 +231,67 @@ public class GestorPartida : MonoBehaviour
             {
                 // Bloqueamos el juego mientras el gato camina
                 estadoActual = EstadoJuego.AnimandoAccion;
+                List<Vector2Int> rutaVisual = ConstruirRutaVisualSimple(coordenadaOrigen, coordenada);
+                unidadSeleccionada.coordenadaInicial = coordenada;
 
-                // TODO: Cuando conectemos la parte visual llamaremos a controladorVisual.IniciarMovimiento();
+                if (controladorVisual != null && rutaVisual != null && rutaVisual.Count > 0)
+                {
+                    controladorVisual.IniciarMovimiento(rutaVisual);
+                }
+                else
+                {
+                    OnMovimientoVisualFinalizado();
+                }
 
                 // Limpiamos variables
                 unidadSeleccionada = null;
-
-                // Por ahora, simularemos que la animación de caminar fue instantánea y pasamos de turno.
-                // CambiarTurno usa jugadorActual (no estadoActual) para que el estado AnimandoAccion
-                // no rompa la lógica de alternancia.
-                CambiarTurno();
             }
             else
             {
-                Debug.LogWarning("Destino inválido o fuera de rango. Selecciona otra casilla o toca al gato para deseleccionarlo.");
+                LogWarningDev("Destino inválido o fuera de rango. Selecciona otra casilla o toca al gato para deseleccionarlo.");
             }
+        }
+    }
+
+    private void OnMovimientoVisualFinalizado()
+    {
+        if (estadoActual != EstadoJuego.AnimandoAccion)
+            return;
+
+        CambiarTurno();
+    }
+
+    private List<Vector2Int> ConstruirRutaVisualSimple(Vector2Int origen, Vector2Int destino)
+    {
+        int distanciaX = Mathf.Abs(destino.x - origen.x);
+        int distanciaY = Mathf.Abs(destino.y - origen.y);
+        TipoMovimiento tipoMovimiento = (distanciaX == 0 || distanciaY == 0)
+            ? TipoMovimiento.Ortogonal
+            : TipoMovimiento.Diagonal;
+
+        return TableroLogico.ConstruirRutaLineal(origen, destino, tipoMovimiento);
+    }
+
+    private Vector2Int ObtenerCoordenadaDesdeTransform(Vector3 posicionMundo)
+    {
+        Vector3 puntoLocal = tablero.transform.InverseTransformPoint(posicionMundo);
+        int xLogica = Mathf.RoundToInt(puntoLocal.x / tamanoCelda);
+        int yLogica = Mathf.RoundToInt(puntoLocal.z / tamanoCelda);
+        return new Vector2Int(xLogica, yLogica);
+    }
+
+    private void ValidarReferenciasEscena()
+    {
+        if (tablero == null)
+        {
+            UnityEngine.Debug.LogError("GestorPartida requiere referencia a TableroLogico.", this);
+            enabled = false;
+            return;
+        }
+
+        if (controladorVisual == null)
+        {
+            LogWarningDev("GestorPartida sin ControladorUnidadVisual: el turno finalizará sin animación visual.");
         }
     }
 
@@ -209,6 +303,6 @@ public class GestorPartida : MonoBehaviour
         jugadorActual = (jugadorActual == 1) ? 2 : 1;
         estadoActual = (jugadorActual == 1) ? EstadoJuego.TurnoJugador1 : EstadoJuego.TurnoJugador2;
         faseActual = FaseTurno.EsperandoSeleccion;
-        Debug.Log($"<color=cyan>--- CAMBIO DE TURNO: {estadoActual} ---</color>");
+        LogDev($"<color=cyan>--- CAMBIO DE TURNO: {estadoActual} ---</color>");
     }
 }

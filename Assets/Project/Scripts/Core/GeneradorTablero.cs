@@ -12,6 +12,9 @@ public class GeneradorTablero : MonoBehaviour
     public Material materialClaro;
     public Material materialOscuro;
 
+    [Header("Colisión")]
+    public bool agregarColliderSiFaltaEnPrefab = false;
+
     void Start()
     {
         GenerarTableroVisual();
@@ -33,6 +36,12 @@ public class GeneradorTablero : MonoBehaviour
             Destroy(hijo.gameObject);
         }
 
+        bool prefabTieneCollider = prefabCasilla.GetComponent<Collider>() != null;
+        if (!prefabTieneCollider && !agregarColliderSiFaltaEnPrefab)
+        {
+            Debug.LogWarning("GeneradorTablero: el prefab no tiene Collider. Activa 'agregarColliderSiFaltaEnPrefab' o corrige el prefab.", this);
+        }
+
         for (int x = 0; x < ancho; x++)
         {
             for (int y = 0; y < alto; y++)
@@ -52,7 +61,7 @@ public class GeneradorTablero : MonoBehaviour
                 }
 
                 // IMPORTANTE: Asegurarnos de que tenga un Collider para el Raycast
-                if (nuevaCasilla.GetComponent<Collider>() == null)
+                if (!prefabTieneCollider && agregarColliderSiFaltaEnPrefab && nuevaCasilla.GetComponent<Collider>() == null)
                 {
                     nuevaCasilla.AddComponent<BoxCollider>();
                 }
