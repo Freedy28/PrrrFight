@@ -267,6 +267,7 @@ GameObject:
   - component: {fileID: 1265567148}
   - component: {fileID: 1265567147}
   - component: {fileID: 1265567146}
+  - component: {fileID: 1265567149}
   m_Layer: 0
   m_Name: Unidad_Prueba
   m_TagString: Untagged
@@ -308,6 +309,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnidadBase
   datosDeClase: {fileID: 11400000, guid: 8b50ec64fb74c26428b88227525fe2c8, type: 2}
+  coordenadaInicial: {x: 0, y: 0}
+--- !u!114 &1265567149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1265567145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4883a10e0257dcf48a2bbfbff9944fcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ControladorUnidadVisual
+  velocidadMovimiento: 5
+  tamanoCelda: 1
 --- !u!4 &1265567148
 Transform:
   m_ObjectHideFlags: 0
@@ -560,8 +576,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestorPartida
   tablero: {fileID: 1582917468}
+  controladorVisual: {fileID: 1265567149}
   camaraPrincipal: {fileID: 70026386}
   tamanoCelda: 1
+  mascaraTablero:
+    serializedVersion: 2
+    m_Bits: -1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

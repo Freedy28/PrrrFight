@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class TableroLogico : MonoBehaviour
@@ -10,11 +11,23 @@ public class TableroLogico : MonoBehaviour
     // La matriz bidimensional que guardará la referencia de quién ocupa cada casilla
     private UnidadBase[,] cuadricula;
 
+    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+    private static void LogDev(string mensaje)
+    {
+        UnityEngine.Debug.Log(mensaje);
+    }
+
+    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+    private static void LogWarningDev(string mensaje)
+    {
+        UnityEngine.Debug.LogWarning(mensaje);
+    }
+
     void Awake()
     {
         // Al instanciar la clase, creamos la matriz vacía
         cuadricula = new UnidadBase[columnas, filas];
-        Debug.Log($"Matriz del tablero generada: {columnas}x{filas}");
+        LogDev($"Matriz del tablero generada: {columnas}x{filas}");
     }
 
     // Valida si una coordenada matemática (x,y) existe dentro de los límites
@@ -33,7 +46,7 @@ public class TableroLogico : MonoBehaviour
             // Aquí en el futuro le diremos a la Vista que mueva el modelo 3D
             return true;
         }
-        Debug.LogWarning($"No se pudo registrar la unidad en [{x},{y}]: la casilla no existe o está ocupada.");
+        LogWarningDev($"No se pudo registrar la unidad en [{x},{y}]: la casilla no existe o está ocupada.");
         return false;
     }
 
@@ -92,11 +105,11 @@ public class TableroLogico : MonoBehaviour
         // 0. Validar que ambas coordenadas están dentro del tablero antes de cualquier cálculo
         if (!EsCoordenadaValida(origenX, origenY) || !EsCoordenadaValida(destinoX, destinoY))
         {
-            Debug.LogWarning($"Coordenadas fuera del tablero: origen [{origenX},{origenY}] o destino [{destinoX},{destinoY}].");
+            LogWarningDev($"Coordenadas fuera del tablero: origen [{origenX},{origenY}] o destino [{destinoX},{destinoY}].");
             return false;
         }
 
-        UnidadBase unidad = ObtenerUnidadEn(origenX, origenY);
+        UnidadBase unidad = cuadricula[origenX, origenY];
 
         if (unidad == null) return false;
 
@@ -105,14 +118,14 @@ public class TableroLogico : MonoBehaviour
 
         if (!enRangoMatematico)
         {
-            Debug.LogWarning($"Movimiento inválido para {unidad.datosDeClase.nombreClase}. Fuera de sus reglas de diseño.");
+            LogWarningDev($"Movimiento inválido para {unidad.datosDeClase.nombreClase}. Fuera de sus reglas de diseño.");
             return false;
         }
 
         // 2b. Verificar que el destino no esté ocupado antes de llamar al pathfinding
-        if (ObtenerUnidadEn(destinoX, destinoY) != null)
+        if (cuadricula[destinoX, destinoY] != null)
         {
-            Debug.LogWarning($"La casilla destino [{destinoX},{destinoY}] ya está ocupada.");
+            LogWarningDev($"La casilla destino [{destinoX},{destinoY}] ya está ocupada.");
             return false;
         }
 
@@ -123,11 +136,15 @@ public class TableroLogico : MonoBehaviour
             ? TipoMovimiento.Ortogonal
             : TipoMovimiento.Diagonal;
 
-        // 4. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding mejorado
+        // 4. Ruta optimizada para reglas actuales: línea recta ortogonal o diagonal.
         Vector2Int inicio = new Vector2Int(origenX, origenY);
         Vector2Int destino = new Vector2Int(destinoX, destinoY);
-
-        List<Vector2Int> ruta = BuscadorRutas.EncontrarCamino(this, inicio, destino, unidad.datosDeClase, tipoMovimiento);
+        List<Vector2Int> ruta = ConstruirRutaLinealSiLibre(inicio, destino, tipoMovimiento);
+        if (ruta == null)
+        {
+            // Fallback para reglas futuras más complejas.
+            ruta = BuscadorRutas.EncontrarCamino(this, inicio, destino, unidad.datosDeClase, tipoMovimiento);
+        }
 
         // Si la ruta no es nula y tiene pasos, el camino está totalmente despejado
         if (ruta != null && ruta.Count > 0)
@@ -136,14 +153,44 @@ public class TableroLogico : MonoBehaviour
             cuadricula[destinoX, destinoY] = unidad;
             cuadricula[origenX, origenY] = null;
 
-            Debug.Log($"{unidad.datosDeClase.nombreClase} se movió lógicamente a [{destinoX},{destinoY}]");
+            LogDev($"{unidad.datosDeClase.nombreClase} se movió lógicamente a [{destinoX},{destinoY}]");
 
             // TODO: En el siguiente paso arquitectónico, aquí pasaremos la variable 'ruta' 
             // a ControladorUnidadVisual.IniciarMovimiento() para que inicie la corrutina de animación.
             return true;
         }
 
-        Debug.LogWarning($"La ruta hacia [{destinoX},{destinoY}] está bloqueada por obstáculos intermedios para {unidad.datosDeClase.nombreClase}.");
+        LogWarningDev($"La ruta hacia [{destinoX},{destinoY}] está bloqueada por obstáculos intermedios para {unidad.datosDeClase.nombreClase}.");
         return false;
-    }   
-}
+    }
+
+    private List<Vector2Int> ConstruirRutaLinealSiLibre(Vector2Int inicio, Vector2Int destino, TipoMovimiento tipoMovimiento)
+    {
+        int deltaX = destino.x - inicio.x;
+        int deltaY = destino.y - inicio.y;
+
+        int pasos = Mathf.Max(Mathf.Abs(deltaX), Mathf.Abs(deltaY));
+        if (pasos <= 0) return null;
+
+        int pasoX = tipoMovimiento == TipoMovimiento.Ortogonal ? (deltaX == 0 ? 0 : (deltaX > 0 ? 1 : -1)) : (deltaX > 0 ? 1 : -1);
+        int pasoY = tipoMovimiento == TipoMovimiento.Ortogonal ? (deltaY == 0 ? 0 : (deltaY > 0 ? 1 : -1)) : (deltaY > 0 ? 1 : -1);
+
+        var ruta = new List<Vector2Int>(pasos);
+        Vector2Int actual = inicio;
+
+        for (int i = 0; i < pasos; i++)
+        {
+            actual = new Vector2Int(actual.x + pasoX, actual.y + pasoY);
+
+            if (!EsCoordenadaValida(actual.x, actual.y))
+                return null;
+
+            if (actual != destino && cuadricula[actual.x, actual.y] != null)
+                return null;
+
+            ruta.Add(actual);
+        }
+
+        return ruta;
+    }
+} 
