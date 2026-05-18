@@ -63,7 +63,8 @@ public class GestorPartida : MonoBehaviour
 
         if (mascaraTablero.value == 0)
         {
-            mascaraTablero = 1 << tablero.gameObject.layer;
+            // Incluye capa del tablero y Default para cubrir casillas hijas sin capa personalizada.
+            mascaraTablero = (1 << tablero.gameObject.layer) | 1;
         }
 
         if (controladorVisual != null)
@@ -286,6 +287,11 @@ public class GestorPartida : MonoBehaviour
             UnityEngine.Debug.LogError("GestorPartida requiere referencia a TableroLogico.", this);
             enabled = false;
             return;
+        }
+
+        if (controladorVisual == null)
+        {
+            LogWarningDev("GestorPartida sin ControladorUnidadVisual: el turno finalizará sin animación visual.");
         }
     }
 

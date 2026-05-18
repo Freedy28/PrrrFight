@@ -185,10 +185,10 @@ public class TableroLogico : MonoBehaviour
     /// Calcula el paso unitario de avance según el delta de coordenada.
     /// </summary>
     /// <param name="delta">Diferencia entre destino y origen para un eje.</param>
-    /// <param name="permitirCero">Si true, devuelve 0 cuando delta es 0 (movimiento ortogonal).</param>
-    public static int CalcularPaso(int delta, bool permitirCero)
+    /// <param name="allowZeroForOrthogonal">Si true, devuelve 0 cuando delta es 0 (movimiento ortogonal).</param>
+    public static int CalcularPaso(int delta, bool allowZeroForOrthogonal)
     {
-        if (permitirCero && delta == 0) return 0;
+        if (allowZeroForOrthogonal && delta == 0) return 0;
         return delta > 0 ? 1 : -1;
     }
 
