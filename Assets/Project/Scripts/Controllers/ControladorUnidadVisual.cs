@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class ControladorUnidadVisual : MonoBehaviour
@@ -57,9 +58,15 @@ public class ControladorUnidadVisual : MonoBehaviour
         }
 
         SeEstaMoviendo = false;
-        Debug.Log("El personaje ha llegado a su destino.");
+        RegistrarLogMovimientoFinalizado();
         MovimientoFinalizado?.Invoke();
 
         // ¡Aquí es donde le avisaremos al juego que el turno del movimiento terminó!
+    }
+
+    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+    private static void RegistrarLogMovimientoFinalizado()
+    {
+        UnityEngine.Debug.Log("El personaje ha llegado a su destino.");
     }
 }
