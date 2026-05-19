@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
 public class ControladorUnidadVisual : MonoBehaviour
@@ -12,7 +10,6 @@ public class ControladorUnidadVisual : MonoBehaviour
 
     // Bandera para evitar que reciba nuevas órdenes mientras camina
     public bool SeEstaMoviendo { get; private set; } = false;
-    public event Action MovimientoFinalizado;
 
     // Este es el método público que llamaremos cuando el jugador toque una casilla
     public void IniciarMovimiento(List<Vector2Int> ruta)
@@ -27,7 +24,6 @@ public class ControladorUnidadVisual : MonoBehaviour
     private IEnumerator RutinaCaminarPorRuta(List<Vector2Int> ruta)
     {
         SeEstaMoviendo = true;
-        const float umbralLlegadaSqr = 0.05f * 0.05f;
 
         // Recorremos cada casilla de la lista que nos dio el Pathfinding
         foreach (Vector2Int paso in ruta)
@@ -40,7 +36,7 @@ public class ControladorUnidadVisual : MonoBehaviour
             transform.LookAt(posicionDestino);
 
             // 3. Moverse suavemente hacia esa coordenada
-            while ((transform.position - posicionDestino).sqrMagnitude > umbralLlegadaSqr)
+            while (Vector3.Distance(transform.position, posicionDestino) > 0.05f)
             {
                 // MoveTowards calcula el pasito exacto que debe dar en este frame
                 transform.position = Vector3.MoveTowards(
@@ -58,15 +54,8 @@ public class ControladorUnidadVisual : MonoBehaviour
         }
 
         SeEstaMoviendo = false;
-        RegistrarLogMovimientoFinalizado();
-        MovimientoFinalizado?.Invoke();
+        Debug.Log("El personaje ha llegado a su destino.");
 
         // ¡Aquí es donde le avisaremos al juego que el turno del movimiento terminó!
-    }
-
-    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-    private void RegistrarLogMovimientoFinalizado()
-    {
-        Debug.Log("El personaje ha llegado a su destino.");
     }
 }
