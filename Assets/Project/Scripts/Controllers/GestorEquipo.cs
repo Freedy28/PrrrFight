@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 public class GestorEquipo : MonoBehaviour
 {
-    [Header("ConexiÛn con la UI")]
-    public Image[] imagenesSlotsEquipo; // Las 3 im·genes de los cuadritos grises
+    [Header("Conexi√≥n con la UI")]
+    public Image[] imagenesSlotsEquipo; // Las 3 im√°genes de los cuadritos grises
     public Sprite spriteCuadroGris;     // Imagen por defecto del cuadro gris
     public Button btnContinuar;
 
-    [Header("Popup de ConfirmaciÛn")]
+    [Header("Popup de Confirmaci√≥n")]
     public GameObject panelConfirmacion;
 
     private int slotQueSeQuiereBorrar = -1;
@@ -21,7 +21,7 @@ public class GestorEquipo : MonoBehaviour
         ActualizarPantalla();
     }
 
-    // Esto lo llamar·n los botones de skins
+    // Esto lo llamar√°n los botones de skins
     public void AgregarGatito(Image imagenDelGatoQuePique)
     {
         Sprite skinSeleccionada = imagenDelGatoQuePique.sprite;
@@ -34,10 +34,10 @@ public class GestorEquipo : MonoBehaviour
         }
     }
 
-    // Esto lo llamar·n los 3 botones de abajo
+    // Esto lo llamar√°n los 3 botones de abajo
     public void TocarSlot(int numeroDeSlot)
     {
-        // Solo abre el aviso si tocaste un slot que sÌ tiene un gato adentro
+        // Solo abre el aviso si tocaste un slot que s√≠ tiene un gato adentro
         if (numeroDeSlot < gatosElegidos.Count)
         {
             slotQueSeQuiereBorrar = numeroDeSlot;
@@ -45,7 +45,7 @@ public class GestorEquipo : MonoBehaviour
         }
     }
 
-    //botÛn "SÕ" del panel
+    //bot√≥n "S√≠" del panel
     public void ConfirmarBorrado()
     {
         if (slotQueSeQuiereBorrar != -1)
@@ -57,14 +57,14 @@ public class GestorEquipo : MonoBehaviour
         }
     }
 
-    //botÛn "NO" del panel
+    //bot√≥n "NO" del panel
     public void CancelarBorrado()
     {
         slotQueSeQuiereBorrar = -1;
         panelConfirmacion.SetActive(false);
     }
 
-    //Dibuja los gatos y prende el botÛn
+    //Dibuja los gatos y prende el bot√≥n
     private void ActualizarPantalla()
     {
         for (int i = 0; i < imagenesSlotsEquipo.Length; i++)
@@ -81,7 +81,7 @@ public class GestorEquipo : MonoBehaviour
             }
         }
 
-        // Si estan los 3 gatos se habilita el botÛn. Si no se bloquea.
+        // Si est√°n los 3 gatos se habilita el bot√≥n. Si no se bloquea.
         btnContinuar.interactable = (gatosElegidos.Count == 3);
     }
 }
