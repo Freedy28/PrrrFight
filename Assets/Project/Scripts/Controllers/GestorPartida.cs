@@ -1,56 +1,41 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem; // <-- Agregado para el Nuevo Input System
+using static UnityEditor.PlayerSettings;
 
-// Estados principales del flujo del juego
-public enum EstadoJuego
-{
-    TurnoJugador1,
-    TurnoJugador2,
-    AnimandoAccion, // Bloquea los toques en pantalla mientras una pieza se mueve
-    FinDePartida
-}
-
-// Fases internas de lo que hace el jugador en su turno
-public enum FaseTurno
-{
-    EsperandoSeleccion, // Debe tocar un gato
-    UnidadSeleccionada  // Ya tocó un gato, debe elegir a dónde moverlo
-}
+public enum EstadoJuego { TurnoJugador1, TurnoJugador2, AnimandoAccion, FinDePartida }
+public enum FaseTurno { EsperandoSeleccion, UnidadSeleccionada }
 
 public class GestorPartida : MonoBehaviour
 {
     [Header("Referencias")]
     public TableroLogico tablero;
-    // public ControladorUnidadVisual controladorVisual; // Lo descomentaremos en la siguiente fase
     public Camera camaraPrincipal;
 
     [Header("Configuración Visual")]
-    public float tamanoCelda = 1f; // Debe ser el mismo que tienes en tu ControladorUnidadVisual
+    public float tamanoCelda = 1f;
+
+    [Header("Resaltado Visual")]
+    public GameObject prefabResaltado; // El cuadrito azul brillante
+    private List<GameObject> casillasResaltadasInstanciadas = new List<GameObject>(); // Para borrarlas después
 
     [Header("Estado Actual (Solo lectura)")]
     public EstadoJuego estadoActual;
     public FaseTurno faseActual;
 
-    // Memoria temporal para la pieza que estamos moviendo
     private UnidadBase unidadSeleccionada;
     private Vector2Int coordenadaOrigen;
-
-    // Jugador actual independiente del estado de animación (1 o 2)
     private int jugadorActual = 1;
 
     void Start()
     {
-        // Si no asignas una cámara en el inspector, busca la Main Camera automáticamente
         if (camaraPrincipal == null) camaraPrincipal = Camera.main;
-
-        // Registramos las unidades ya presentes en la escena antes de permitir input
         RegistrarUnidadesIniciales();
-
         estadoActual = EstadoJuego.TurnoJugador1;
         faseActual = FaseTurno.EsperandoSeleccion;
-        Debug.Log("Inicia la partida. Turno del Jugador 1.");
     }
 
-    // Busca todos los UnidadBase en la escena y los registra en el tablero lógico
     private void RegistrarUnidadesIniciales()
     {
         UnidadBase[] unidades = FindObjectsByType<UnidadBase>(FindObjectsSortMode.None);
@@ -58,18 +43,13 @@ public class GestorPartida : MonoBehaviour
         {
             bool registrada = tablero.RegistrarUnidad(unidad, unidad.coordenadaInicial.x, unidad.coordenadaInicial.y);
             if (registrada)
-                Debug.Log($"Unidad '{unidad.datosDeClase?.nombreClase}' registrada en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}].");
-            else
-                Debug.LogWarning($"No se pudo registrar '{unidad.datosDeClase?.nombreClase}' en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}]: coordenada inválida u ocupada.");
+                Debug.Log($"Unidad '{unidad.datosDeClase?.nombreClase}' registrada exitosamente en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}].");
         }
     }
 
     void Update()
     {
-        // Si hay una animación reproduciéndose o el juego terminó, ignoramos la pantalla
-        if (estadoActual == EstadoJuego.AnimandoAccion || estadoActual == EstadoJuego.FinDePartida)
-            return;
-
+        if (estadoActual == EstadoJuego.AnimandoAccion || estadoActual == EstadoJuego.FinDePartida) return;
         DetectarInput();
     }
 
@@ -78,70 +58,61 @@ public class GestorPartida : MonoBehaviour
         Vector3 posicionInput = Vector3.zero;
         bool inputDetectado = false;
 
-        // Detectamos toque táctil (Android/iOS) con fingerId correcto para el EventSystem
-        if (Input.touchCount > 0)
-        {
-            Touch toque = Input.GetTouch(0);
-            if (toque.phase == TouchPhase.Began)
-            {
-                // Pasamos el fingerId para que la detección de UI funcione en móvil
-                if (UnityEngine.EventSystems.EventSystem.current != null &&
-                    UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(toque.fingerId))
-                    return;
+        // --- LÓGICA DEL NUEVO INPUT SYSTEM ---
 
-                posicionInput = toque.position;
+        // 1. Detección Táctil (Móviles)
+        if (Touchscreen.current != null && Touchscreen.current.touches.Count > 0)
+        {
+            var toque = Touchscreen.current.touches[0];
+            if (toque.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+            {
+                if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(toque.touchId.ReadValue())) return;
+                posicionInput = toque.position.ReadValue();
                 inputDetectado = true;
             }
         }
-        // GetMouseButtonDown(0) en PC/Editor
-        else if (Input.GetMouseButtonDown(0))
+        // 2. Detección de Ratón (PC/Editor)
+        else if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
-            // Evitamos que los clics sobre elementos de UI disparen un Raycast de escena
-            if (UnityEngine.EventSystems.EventSystem.current != null &&
-                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-                return;
-
-            posicionInput = Input.mousePosition;
+            if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
+            posicionInput = Mouse.current.position.ReadValue();
             inputDetectado = true;
         }
+
+        // -------------------------------------
 
         if (inputDetectado)
         {
             Vector2Int coordenadaTocada = ConvertirToqueACoordenada(posicionInput);
-
-            // Verificamos que el toque no devolviera la coordenada inválida (-1, -1)
-            if (coordenadaTocada.x != -1)
-            {
-                ProcesarToque(coordenadaTocada);
-            }
+            if (coordenadaTocada.x != -1) ProcesarToque(coordenadaTocada);
         }
     }
 
     private Vector2Int ConvertirToqueACoordenada(Vector3 posicionPantalla)
     {
-        // 1. Creamos un rayo invisible que sale de la cámara y atraviesa el punto de la pantalla que tocaste
         Ray rayo = camaraPrincipal.ScreenPointToRay(posicionPantalla);
-        RaycastHit impacto;
-
-        // 2. Disparamos el rayo hacia la escena 3D
-        if (Physics.Raycast(rayo, out impacto))
+        if (Physics.Raycast(rayo, out RaycastHit impacto))
         {
-            // 3. Convertimos el punto de impacto al espacio local del tablero para soportar
-            //    cualquier posición, rotación o escala del GameObject del tablero
-            Vector3 puntoLocal = tablero.transform.InverseTransformPoint(impacto.point);
+            Debug.Log($"El ratón golpeó físicamente a: {impacto.collider.gameObject.name}");
 
-            // 4. Traducción Inversa: Transformamos el espacio local a la cuadrícula 2D de TableroLogico
-            int xLogica = Mathf.RoundToInt(puntoLocal.x / tamanoCelda);
-            int yLogica = Mathf.RoundToInt(puntoLocal.z / tamanoCelda);
-
-            // 5. Verificamos con TableroLogico que no hayamos tocado fuera de los límites
-            if (tablero.EsCoordenadaValida(xLogica, yLogica))
+            // 1. ¿Le dimos directo al Collider del gato?
+            UnidadBase gatoTocado = impacto.collider.GetComponentInParent<UnidadBase>();
+            if (gatoTocado != null)
             {
-                return new Vector2Int(xLogica, yLogica);
+                return gatoTocado.coordenadaInicial;
+            }
+
+            // 2. ¿Le dimos al suelo? (A prueba de fallos)
+            // Si golpeamos un objeto que en su nombre dice "Casilla", tomamos SU posición exacta.
+            if (impacto.collider.gameObject.name.StartsWith("Casilla"))
+            {
+                // Como las casillas están en las coordenadas exactas, solo leemos su Transform
+                int xExacta = Mathf.RoundToInt(impacto.collider.transform.localPosition.x / tamanoCelda);
+                int yExacta = Mathf.RoundToInt(impacto.collider.transform.localPosition.z / tamanoCelda);
+
+                return new Vector2Int(xExacta, yExacta);
             }
         }
-
-        // Si tocaste al vacío o fuera del tablero, devolvemos este valor de error
         return new Vector2Int(-1, -1);
     }
 
@@ -153,62 +124,92 @@ public class GestorPartida : MonoBehaviour
 
             if (unidadTocada != null)
             {
-                // TODO: Más adelante validaremos si el gato le pertenece al Jugador 1 o 2
-                unidadSeleccionada = unidadTocada;
-                coordenadaOrigen = coordenada;
-                faseActual = FaseTurno.UnidadSeleccionada;
+                if (unidadTocada.idEquipo == jugadorActual)
+                {
+                    unidadSeleccionada = unidadTocada;
+                    coordenadaOrigen = coordenada;
+                    faseActual = FaseTurno.UnidadSeleccionada;
+                    Debug.Log($"<color=green>Seleccionaste a:</color> {unidadTocada.datosDeClase.nombreClase} en [{coordenada.x}, {coordenada.y}]");
 
-                Debug.Log($"<color=green>Seleccionaste:</color> {unidadTocada.datosDeClase.nombreClase} en [{coordenada.x}, {coordenada.y}]");
-            }
-            else
-            {
-                Debug.Log("Tocaste una casilla vacía. Selecciona a un gato primero.");
+                    // --- NUEVO: Mostramos el resaltado ---
+                    MostrarResaltadoDeMovimiento(unidadTocada, coordenada.x, coordenada.y);
+                }
+                else
+                {
+                    Debug.LogWarning("Ese gato pertenece al enemigo.");
+                }
             }
         }
         else if (faseActual == FaseTurno.UnidadSeleccionada)
         {
-            // Si tocas el mismo gato que ya tenías seleccionado, se cancela la selección
+            // Si tocas el mismo gato (o tocas otra cosa para cancelar)
             if (coordenada == coordenadaOrigen)
             {
                 unidadSeleccionada = null;
                 faseActual = FaseTurno.EsperandoSeleccion;
-                Debug.Log("Unidad deseleccionada.");
+                LimpiarResaltado(); // --- NUEVO: Limpiamos pantalla ---
+                Debug.Log("Gato deseleccionado.");
                 return;
             }
 
-            // Llamamos a la lógica que corregimos anteriormente en TableroLogico
-            bool movimientoExitoso = tablero.IntentarMoverUnidad(coordenadaOrigen.x, coordenadaOrigen.y, coordenada.x, coordenada.y);
-
-            if (movimientoExitoso)
+            List<Vector2Int> ruta = tablero.IntentarMoverUnidad(coordenadaOrigen.x, coordenadaOrigen.y, coordenada.x, coordenada.y);
+            if (ruta != null && ruta.Count > 0)
             {
-                // Bloqueamos el juego mientras el gato camina
                 estadoActual = EstadoJuego.AnimandoAccion;
+                LimpiarResaltado(); // --- NUEVO: Limpiamos pantalla porque ya se va a mover ---
 
-                // TODO: Cuando conectemos la parte visual llamaremos a controladorVisual.IniciarMovimiento();
+                ControladorUnidadVisual visual = unidadSeleccionada.GetComponent<ControladorUnidadVisual>();
+                unidadSeleccionada.coordenadaInicial = coordenada;
 
-                // Limpiamos variables
+                if (visual != null)
+                {
+                    visual.IniciarMovimiento(ruta);
+                    StartCoroutine(EsperarMovimientoYCambiarTurno(visual));
+                }
+                else CambiarTurno();
                 unidadSeleccionada = null;
-
-                // Por ahora, simularemos que la animación de caminar fue instantánea y pasamos de turno.
-                // CambiarTurno usa jugadorActual (no estadoActual) para que el estado AnimandoAccion
-                // no rompa la lógica de alternancia.
-                CambiarTurno();
             }
-            else
-            {
-                Debug.LogWarning("Destino inválido o fuera de rango. Selecciona otra casilla o toca al gato para deseleccionarlo.");
-            }
+            else Debug.LogWarning("Movimiento inválido o fuera de rango.");
         }
     }
 
-    // Método para alternar el flujo del juego
+    // --- MÉTODOS NUEVOS PARA DIBUJAR/BORRAR ---
+    private void MostrarResaltadoDeMovimiento(UnidadBase unidad, int origenX, int origenY)
+    {
+        if (prefabResaltado == null) return;
+
+        List<Vector2Int> validas = tablero.ObtenerMovimientosValidos(unidad, origenX, origenY);
+
+        foreach (Vector2Int pos in validas)
+        {
+            // Instanciamos el cuadrito ligeramente por encima del suelo (Y: 0.05) para que no se superponga (Z-Fighting)
+            Vector3 posicionMundo = new Vector3(pos.x * tamanoCelda, 0.05f, pos.y * tamanoCelda);
+            GameObject resaltado = Instantiate(prefabResaltado, posicionMundo, prefabResaltado.transform.rotation);
+            casillasResaltadasInstanciadas.Add(resaltado);
+        }
+    }
+
+    private void LimpiarResaltado()
+    {
+        foreach (GameObject resaltado in casillasResaltadasInstanciadas)
+        {
+            Destroy(resaltado);
+        }
+        casillasResaltadasInstanciadas.Clear();
+    }
+
+    private IEnumerator EsperarMovimientoYCambiarTurno(ControladorUnidadVisual visual)
+    {
+        yield return null;
+        while (visual.SeEstaMoviendo) yield return null;
+        CambiarTurno();
+    }
+
     public void CambiarTurno()
     {
-        // Alternamos basándonos en jugadorActual, no en estadoActual, para que el estado
-        // AnimandoAccion no interfiera con la lógica de cambio de turno.
         jugadorActual = (jugadorActual == 1) ? 2 : 1;
         estadoActual = (jugadorActual == 1) ? EstadoJuego.TurnoJugador1 : EstadoJuego.TurnoJugador2;
         faseActual = FaseTurno.EsperandoSeleccion;
-        Debug.Log($"<color=cyan>--- CAMBIO DE TURNO: {estadoActual} ---</color>");
+        Debug.Log($"<color=cyan>--- CAMBIO DE TURNO: Jugador {jugadorActual} ---</color>");
     }
 }

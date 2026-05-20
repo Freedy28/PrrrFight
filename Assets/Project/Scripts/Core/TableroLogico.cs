@@ -87,33 +87,34 @@ public class TableroLogico : MonoBehaviour
         return false; // Si no cumplió ninguna regla, el movimiento es inválido
     }
     // Intenta mover una unidad de una casilla a otra
-    public bool IntentarMoverUnidad(int origenX, int origenY, int destinoX, int destinoY)
+    // Ahora devuelve la ruta (List<Vector2Int>) en lugar de bool
+    public List<Vector2Int> IntentarMoverUnidad(int origenX, int origenY, int destinoX, int destinoY)
     {
         // 0. Validar que ambas coordenadas están dentro del tablero antes de cualquier cálculo
         if (!EsCoordenadaValida(origenX, origenY) || !EsCoordenadaValida(destinoX, destinoY))
         {
             Debug.LogWarning($"Coordenadas fuera del tablero: origen [{origenX},{origenY}] o destino [{destinoX},{destinoY}].");
-            return false;
+            return null;
         }
 
         UnidadBase unidad = ObtenerUnidadEn(origenX, origenY);
 
-        if (unidad == null) return false;
+        if (unidad == null) return null;
 
-        // 1. Validamos matemáticamente primero (es rápido y descarta clics erróneos de inmediato)
+        // 1. Validamos matemáticamente primero
         bool enRangoMatematico = ValidarRangoMovimiento(origenX, origenY, destinoX, destinoY, unidad.datosDeClase);
 
         if (!enRangoMatematico)
         {
             Debug.LogWarning($"Movimiento inválido para {unidad.datosDeClase.nombreClase}. Fuera de sus reglas de diseño.");
-            return false;
+            return null;
         }
 
         // 2b. Verificar que el destino no esté ocupado antes de llamar al pathfinding
         if (ObtenerUnidadEn(destinoX, destinoY) != null)
         {
             Debug.LogWarning($"La casilla destino [{destinoX},{destinoY}] ya está ocupada.");
-            return false;
+            return null;
         }
 
         // 3. Determinar el tipo de movimiento para que el pathfinding use las direcciones correctas
@@ -123,7 +124,7 @@ public class TableroLogico : MonoBehaviour
             ? TipoMovimiento.Ortogonal
             : TipoMovimiento.Diagonal;
 
-        // 4. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding mejorado
+        // 4. Confirmamos si hay una ruta libre de obstáculos usando el Pathfinding
         Vector2Int inicio = new Vector2Int(origenX, origenY);
         Vector2Int destino = new Vector2Int(destinoX, destinoY);
 
@@ -138,12 +139,46 @@ public class TableroLogico : MonoBehaviour
 
             Debug.Log($"{unidad.datosDeClase.nombreClase} se movió lógicamente a [{destinoX},{destinoY}]");
 
-            // TODO: En el siguiente paso arquitectónico, aquí pasaremos la variable 'ruta' 
-            // a ControladorUnidadVisual.IniciarMovimiento() para que inicie la corrutina de animación.
-            return true;
+            // Retornamos la ruta calculada para que la vista la procese
+            return ruta;
         }
 
         Debug.LogWarning($"La ruta hacia [{destinoX},{destinoY}] está bloqueada por obstáculos intermedios para {unidad.datosDeClase.nombreClase}.");
-        return false;
-    }   
+        return null;
+    }
+    // Nuevo método: Devuelve una lista de todas las casillas a las que la unidad puede caminar
+    public List<Vector2Int> ObtenerMovimientosValidos(UnidadBase unidad, int origenX, int origenY)
+    {
+        List<Vector2Int> casillasValidas = new List<Vector2Int>();
+
+        for (int x = 0; x < columnas; x++)
+        {
+            for (int y = 0; y < filas; y++)
+            {
+                // Ignoramos la casilla donde ya está parado el gato
+                if (x == origenX && y == origenY) continue;
+
+                // 1. Verificamos si está dentro de la distancia matemática de su clase
+                if (ValidarRangoMovimiento(origenX, origenY, x, y, unidad.datosDeClase))
+                {
+                    // 2. Verificamos que la casilla destino no esté ocupada
+                    if (ObtenerUnidadEn(x, y) == null)
+                    {
+                        // 3. Verificamos que exista un camino real (BuscadorRutas)
+                        int distanciaX = Mathf.Abs(x - origenX);
+                        int distanciaY = Mathf.Abs(y - origenY);
+                        TipoMovimiento tipo = (distanciaX == 0 || distanciaY == 0) ? TipoMovimiento.Ortogonal : TipoMovimiento.Diagonal;
+
+                        List<Vector2Int> ruta = BuscadorRutas.EncontrarCamino(this, new Vector2Int(origenX, origenY), new Vector2Int(x, y), unidad.datosDeClase, tipo);
+
+                        if (ruta != null && ruta.Count > 0)
+                        {
+                            casillasValidas.Add(new Vector2Int(x, y));
+                        }
+                    }
+                }
+            }
+        }
+        return casillasValidas;
+    }
 }
