@@ -1,11 +1,14 @@
 using UnityEngine;
 
+
 // Clase base para todas las unidades del tablero
 public class UnidadBase : MonoBehaviour
 {
     // Cada unidad tiene datos de clase asignados desde el Inspector
     public ClaseBaseSO datosDeClase;
-
+    [Header("Configuración de equipo")]
+    [Tooltip("1 para el Jugador 1, 2 para el Jugador 2")]
+    public int idEquipo = 1;
     // Coordenada inicial dentro del tablero lógico (asignar desde el Inspector)
     public Vector2Int coordenadaInicial;
 

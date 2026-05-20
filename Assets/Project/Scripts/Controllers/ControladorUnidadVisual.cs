@@ -21,41 +21,49 @@ public class ControladorUnidadVisual : MonoBehaviour
     }
 
     // La magia visual ocurre aquí
+    // La magia visual ocurre aquí
+    // La magia visual ocurre aquí
     private IEnumerator RutinaCaminarPorRuta(List<Vector2Int> ruta)
     {
         SeEstaMoviendo = true;
 
-        // Recorremos cada casilla de la lista que nos dio el Pathfinding
         foreach (Vector2Int paso in ruta)
         {
-            // 1. Traducir la coordenada matemática [X, Y] a una posición física en Unity (X, 0, Z)
-            // Asumimos que Y es 0 porque se mueven sobre una superficie plana
-            Vector3 posicionDestino = new Vector3(paso.x * tamanoCelda, 0, paso.y * tamanoCelda);
+            // 1. Buscamos la casilla física en la escena por su nombre (ej. "Casilla_1_2")
+            GameObject casillaFisica = GameObject.Find($"Casilla_{paso.x}_{paso.y}");
+            Vector3 posicionDestino;
 
-            // 2. Girar al personaje para que mire hacia donde camina (Opcional pero recomendado)
-            transform.LookAt(posicionDestino);
+            if (casillaFisica != null)
+            {
+                // Tomamos la posición X y Z exactas de la casilla en el mundo.
+                // MANTENEMOS la Y actual del personaje (transform.position.y) para que no se hunda.
+                posicionDestino = new Vector3(casillaFisica.transform.position.x, transform.position.y, casillaFisica.transform.position.z);
+            }
+            else
+            {
+                // Respaldo matemático por si la casilla no existe
+                posicionDestino = new Vector3(paso.x * tamanoCelda, transform.position.y, paso.y * tamanoCelda);
+            }
+
+            // 2. Girar al personaje (Arreglado para que no se incline hacia el piso si las alturas varían)
+            transform.LookAt(new Vector3(posicionDestino.x, transform.position.y, posicionDestino.z));
 
             // 3. Moverse suavemente hacia esa coordenada
             while (Vector3.Distance(transform.position, posicionDestino) > 0.05f)
             {
-                // MoveTowards calcula el pasito exacto que debe dar en este frame
                 transform.position = Vector3.MoveTowards(
                     transform.position,
                     posicionDestino,
                     velocidadMovimiento * Time.deltaTime
                 );
-
-                // yield return null le dice a Unity: "Pausa aquí, dibuja el frame en pantalla, y continuamos en el siguiente frame"
                 yield return null;
             }
 
-            // 4. Forzamos la posición para evitar errores de punto flotante al llegar
+            // 4. Forzamos la posición exacta al llegar
             transform.position = posicionDestino;
         }
 
         SeEstaMoviendo = false;
         Debug.Log("El personaje ha llegado a su destino.");
-
-        // ¡Aquí es donde le avisaremos al juego que el turno del movimiento terminó!
     }
 }

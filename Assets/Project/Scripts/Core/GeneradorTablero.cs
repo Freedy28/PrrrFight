@@ -8,58 +8,60 @@ public class GeneradorTablero : MonoBehaviour
     public float tamanoCelda = 1f;
 
     [Header("Visual")]
-    public GameObject prefabCasilla; // Un plano o cubo que represente la casilla
+    public GameObject prefabCasilla;
     public Material materialClaro;
     public Material materialOscuro;
 
     void Start()
     {
+        // En el juego real, esto se llamará y construirá el tablero.
         GenerarTableroVisual();
     }
 
+    [ContextMenu("Generar Tablero Visualmente")]
     public void GenerarTableroVisual()
     {
-        // Validar que el prefab esté asignado antes de proceder
         if (prefabCasilla == null)
         {
             Debug.LogError("GeneradorTablero: prefabCasilla no está asignado. Abortando generación del tablero.", this);
-            enabled = false;
             return;
         }
 
-        // Limpiamos el tablero si ya existía algo (útil para prototipar)
-        foreach (Transform hijo in transform)
+        // Limpiamos el tablero (usamos DestroyImmediate para el modo Edición)
+        for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            Destroy(hijo.gameObject);
+            DestroyImmediate(transform.GetChild(i).gameObject);
         }
 
+        // Si tu prefabCasilla es un plano por defecto de Unity, normalmente mide 10x10.
+        // Si es un "Quad" o un cubo de 1x1, este cálculo lo centrará perfecto.
         for (int x = 0; x < ancho; x++)
         {
             for (int y = 0; y < alto; y++)
             {
-                // Instanciamos la casilla como hijo del tablero y usamos posición local
-                // para que el tablero pueda moverse/rotarse sin desalinear la grilla
                 GameObject nuevaCasilla = Instantiate(prefabCasilla, this.transform);
-                nuevaCasilla.transform.localPosition = new Vector3(x * tamanoCelda, 0, y * tamanoCelda);
-                nuevaCasilla.transform.localRotation = Quaternion.identity;
-                nuevaCasilla.name = $"Casilla_{x}_{y}";
 
-                // Aplicamos color tipo ajedrez si tenemos los materiales
+                // AQUÍ ESTÁ EL CAMBIO MÁGICO:
+                // Colocamos la casilla exactamente en las coordenadas X e Y enteras.
+                // Si tu prefab dibuja desde la esquina en vez del centro, 
+                // aquí es donde lo compensamos.
+                nuevaCasilla.transform.localPosition = new Vector3(x * tamanoCelda, 0, y * tamanoCelda);
+
+                // Ahora copia la rotación exacta que tiene tu Prefab (los 90 grados en X)
+                nuevaCasilla.transform.rotation = prefabCasilla.transform.rotation; nuevaCasilla.name = $"Casilla_{x}_{y}";
+
                 MeshRenderer render = nuevaCasilla.GetComponent<MeshRenderer>();
                 if (render != null)
                 {
                     render.sharedMaterial = (x + y) % 2 == 0 ? materialClaro : materialOscuro;
                 }
 
-                // IMPORTANTE: Asegurarnos de que tenga un Collider para el Raycast
                 if (nuevaCasilla.GetComponent<Collider>() == null)
                 {
                     nuevaCasilla.AddComponent<BoxCollider>();
                 }
             }
         }
-
-        // Opcional: Centrar la cámara o el tablero
         Debug.Log($"Tablero de {ancho}x{alto} generado visualmente.");
     }
 }
