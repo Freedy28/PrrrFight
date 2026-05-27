@@ -23,6 +23,6 @@ MonoBehaviour:
   - {fileID: -1841641318, guid: e3fddf9f50ae2d94fa274ad6230e43e3, type: 3}
   - {fileID: -148087526, guid: 51a53eec9c4e7ea4698042378b0ba289, type: 3}
   prefabsSkins:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 3760862659274305368, guid: 1d00ad42dc7c0054e9cb564efee000e3, type: 3}
+  - {fileID: 3760862659274305368, guid: 1d00ad42dc7c0054e9cb564efee000e3, type: 3}
+  - {fileID: 3760862659274305368, guid: 1d00ad42dc7c0054e9cb564efee000e3, type: 3}
