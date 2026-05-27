@@ -882,18 +882,6 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1058157911}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 294741026}
         m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
         m_MethodName: PlaySFX
@@ -926,11 +914,11 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 774878953}
           m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
-          m_MethodName: ActualizarFicha
-          m_Mode: 2
+          m_MethodName: MostrarClase
+          m_Mode: 3
           m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 8b50ec64fb74c26428b88227525fe2c8, type: 2}
-            m_ObjectArgumentAssemblyTypeName: ClaseBaseSO, Assembly-CSharp
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: 
@@ -1377,13 +1365,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 1867640752}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -2550,14 +2538,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 165867018}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -3443,14 +3431,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 1055927432}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -3801,13 +3789,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 1620007939}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -3947,14 +3935,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 1407784866}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -4607,13 +4595,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 1946616485}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -4890,14 +4878,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 1074365158}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -5399,6 +5387,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestorFicha
   textoDescripcion: {fileID: 1607361765}
+  panelesDeSkins:
+  - {fileID: 1058157911}
+  - {fileID: 415182711}
+  - {fileID: 1150832866}
+  - {fileID: 1252356691}
+  gestorEquipo: {fileID: 1279205826}
+  datosLuchador: {fileID: 11400000, guid: 8b50ec64fb74c26428b88227525fe2c8, type: 2}
+  datosTanque: {fileID: 11400000, guid: 332d3961729fa514b96cee7d9da481bd, type: 2}
+  datosTirador: {fileID: 11400000, guid: a2523b7638f06004095259ba4370921d, type: 2}
+  datosClerigo: {fileID: 11400000, guid: 895e858a5fe24094eb007a3f50863c07, type: 2}
 --- !u!1 &784789884
 GameObject:
   m_ObjectHideFlags: 0
@@ -5908,14 +5906,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 335408319}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -8656,6 +8654,7 @@ MonoBehaviour:
   spriteCuadroGris: {fileID: 21300000, guid: f1eca87986aa9cf42a52964bc443b13d, type: 3}
   btnContinuar: {fileID: 367526351}
   panelConfirmacion: {fileID: 340693531}
+  gatosElegidos: []
 --- !u!1 &1288796610
 GameObject:
   m_ObjectHideFlags: 0
@@ -9874,7 +9873,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 415182711}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 0
@@ -9918,12 +9917,12 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 774878953}
           m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
-          m_MethodName: ActualizarFicha
-          m_Mode: 2
+          m_MethodName: MostrarClase
+          m_Mode: 3
           m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 332d3961729fa514b96cee7d9da481bd, type: 2}
-            m_ObjectArgumentAssemblyTypeName: ClaseBaseSO, Assembly-CSharp
-            m_IntArgument: 0
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 1
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -10012,14 +10011,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 1355825236}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -10295,14 +10294,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 2039077446}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -10961,7 +10960,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1252356691}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 0
@@ -11005,12 +11004,12 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 774878953}
           m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
-          m_MethodName: ActualizarFicha
-          m_Mode: 2
+          m_MethodName: MostrarClase
+          m_Mode: 3
           m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 895e858a5fe24094eb007a3f50863c07, type: 2}
-            m_ObjectArgumentAssemblyTypeName: ClaseBaseSO, Assembly-CSharp
-            m_IntArgument: 0
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 3
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -12300,7 +12299,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1150832866}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 0
@@ -12344,12 +12343,12 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 774878953}
           m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
-          m_MethodName: ActualizarFicha
-          m_Mode: 2
+          m_MethodName: MostrarClase
+          m_Mode: 3
           m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: a2523b7638f06004095259ba4370921d, type: 2}
-            m_ObjectArgumentAssemblyTypeName: ClaseBaseSO, Assembly-CSharp
-            m_IntArgument: 0
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 2
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -12861,13 +12860,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 464131816}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -13429,14 +13428,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1279205826}
-        m_TargetAssemblyTypeName: GestorEquipo, Assembly-CSharp
-        m_MethodName: AgregarGatito
-        m_Mode: 2
+      - m_Target: {fileID: 774878953}
+        m_TargetAssemblyTypeName: GestorFicha, Assembly-CSharp
+        m_MethodName: TocarBotonSkin
+        m_Mode: 3
         m_Arguments:
-          m_ObjectArgument: {fileID: 138825930}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0

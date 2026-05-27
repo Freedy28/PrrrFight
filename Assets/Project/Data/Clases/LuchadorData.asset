@@ -18,3 +18,11 @@ MonoBehaviour:
   puntosSaludBase: 18
   movimientoOrtogonal: 3
   movimientoDiagonal: 2
+  spritesSkins:
+  - {fileID: -2052094700, guid: 0276c718ed298a9408c7c85c84a2e5cb, type: 3}
+  - {fileID: -2029582438, guid: 9e0bccc2fae1e334bb2420c22ee04def, type: 3}
+  - {fileID: -684994623, guid: 07e06812e13d0134bb2e1b7108815867, type: 3}
+  prefabsSkins:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
