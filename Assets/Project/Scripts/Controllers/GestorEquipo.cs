@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class GestorEquipo : MonoBehaviour
 {
@@ -101,4 +102,26 @@ public class GestorEquipo : MonoBehaviour
         // Si están los 3 gatos se habilita el botón. Si no se bloquea.
         btnContinuar.interactable = (gatosElegidos.Count == 3);
     }
+
+    public void IrAlTablero()
+        {
+            // 1. Validamos que haya 3 gatos
+            if (gatosElegidos.Count == 3)
+            {
+                // 2. Pasamos la lista a la mochila global
+                if (DatosGlobales.Instancia != null)
+                {
+                    DatosGlobales.Instancia.equipoJugador = new List<GatoSeleccionado>(gatosElegidos);
+                }
+                else
+                {
+                    Debug.LogError("¡Falta el objeto DatosGlobales en la escena!");
+                    return;
+                }
+
+                // 3. Cargamos la escena del tablero (asegúrate de que se llame exactamente así)
+                SceneManager.LoadScene("Tablero");
+            }
+        }
+
 }
