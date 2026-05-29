@@ -1,9 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class GestorEquipo : MonoBehaviour
 {
+    // Una pequeña estructura para guardar la combinación exacta de clase y skin
+    [System.Serializable]
+    public struct GatoSeleccionado
+    {
+        public ClaseBaseSO claseDatos;
+        public int indiceSkin;
+    }
+
     [Header("Conexión con la UI")]
     public Image[] imagenesSlotsEquipo; // Las 3 imágenes de los cuadritos grises
     public Sprite spriteCuadroGris;     // Imagen por defecto del cuadro gris
@@ -12,9 +21,10 @@ public class GestorEquipo : MonoBehaviour
     [Header("Popup de Confirmación")]
     public GameObject panelConfirmacion;
 
+    // Ahora guardamos la Ficha de Datos completa.
+    // Se podrá acceder a "gatosElegidos[0].prefabTablero" mas facil.
     private int slotQueSeQuiereBorrar = -1;
-    private List<Sprite> gatosElegidos = new List<Sprite>(); // Lista que guarda a los gatos
-
+    public List<GatoSeleccionado> gatosElegidos = new List<GatoSeleccionado>();
     void Start()
     {
         panelConfirmacion.SetActive(false);
@@ -22,14 +32,18 @@ public class GestorEquipo : MonoBehaviour
     }
 
     // Esto lo llamarán los botones de skins
-    public void AgregarGatito(Image imagenDelGatoQuePique)
+    public void AgregarGatito(ClaseBaseSO clase, int skin)
     {
-        Sprite skinSeleccionada = imagenDelGatoQuePique.sprite;
+        //Sprite skinSeleccionada = nuevoGato.sprite;
+
+        // Validamos que no se meta dos veces exactamente al mismo gato (misma clase y misma skin)
+        bool yaExiste = gatosElegidos.Exists(g => g.claseDatos == clase && g.indiceSkin == skin);
 
         // Revisa que haya espacio (< 3) y que no se haya metido ya a ese mismo gatito
-        if (gatosElegidos.Count < 3 && !gatosElegidos.Contains(skinSeleccionada))
+        if (gatosElegidos.Count < 3 && !yaExiste)
         {
-            gatosElegidos.Add(skinSeleccionada);
+            GatoSeleccionado nuevoGato = new GatoSeleccionado { claseDatos = clase, indiceSkin = skin };
+            gatosElegidos.Add(nuevoGato);
             ActualizarPantalla();
         }
     }
@@ -71,7 +85,11 @@ public class GestorEquipo : MonoBehaviour
         {
             if (i < gatosElegidos.Count)
             {
-                imagenesSlotsEquipo[i].sprite = gatosElegidos[i]; // Pone al gato
+                // Obtenemos el sprite correcto desde el ScriptableObject usando el índice guardado
+                ClaseBaseSO claseGato = gatosElegidos[i].claseDatos;
+                int skinGato = gatosElegidos[i].indiceSkin;
+
+                imagenesSlotsEquipo[i].sprite = claseGato.spritesSkins[skinGato]; // Pone al gato
                 imagenesSlotsEquipo[i].color = Color.white;
             }
             else
@@ -84,4 +102,26 @@ public class GestorEquipo : MonoBehaviour
         // Si están los 3 gatos se habilita el botón. Si no se bloquea.
         btnContinuar.interactable = (gatosElegidos.Count == 3);
     }
+
+    public void IrAlTablero()
+        {
+            // 1. Validamos que haya 3 gatos
+            if (gatosElegidos.Count == 3)
+            {
+                // 2. Pasamos la lista a la mochila global
+                if (DatosGlobales.Instancia != null)
+                {
+                    DatosGlobales.Instancia.equipoJugador = new List<GatoSeleccionado>(gatosElegidos);
+                }
+                else
+                {
+                    Debug.LogError("¡Falta el objeto DatosGlobales en la escena!");
+                    return;
+                }
+
+                // 3. Cargamos la escena del tablero (asegúrate de que se llame exactamente así)
+                SceneManager.LoadScene("Tablero");
+            }
+        }
+
 }
