@@ -52,7 +52,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Tank3_front_anim
-  m_Speed: 0.3
+  m_Speed: 0.12
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []
@@ -64,7 +64,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 0f2cccfc0e46e3446a8a814da6d1f23a, type: 2}
+  m_Motion: {fileID: 7400000, guid: 839e46fb71e9361428ab36a4be6b6b60, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
