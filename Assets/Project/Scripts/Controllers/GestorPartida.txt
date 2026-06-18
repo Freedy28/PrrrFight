@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem; // <-- Agregado para el Nuevo Input System
-using TMPro; // <-- NUEVO: Librería necesaria para controlar la interfaz de usuario (TextMeshPro)
+using static UnityEditor.PlayerSettings;
 
 public enum EstadoJuego { TurnoJugador1, TurnoJugador2, AnimandoAccion, FinDePartida }
 public enum FaseTurno { EsperandoSeleccion, UnidadSeleccionada }
@@ -12,9 +12,6 @@ public class GestorPartida : MonoBehaviour
     [Header("Referencias")]
     public TableroLogico tablero;
     public Camera camaraPrincipal;
-
-    [Header("Interfaz de Usuario")]
-    public TextMeshProUGUI textoInstrucciones; // <-- NUEVO: Referencia a tu texto en pantalla
 
     [Header("Configuración Visual")]
     public float tamanoCelda = 1f;
@@ -34,23 +31,17 @@ public class GestorPartida : MonoBehaviour
     void Start()
     {
         if (camaraPrincipal == null) camaraPrincipal = Camera.main;
-
         RegistrarUnidadesIniciales();
         estadoActual = EstadoJuego.TurnoJugador1;
         faseActual = FaseTurno.EsperandoSeleccion;
-
-        // --- NUEVO: Texto inicial al arrancar la partida ---
-        ActualizarTextoInstruccion("Turno del Jugador 1: Selecciona tu guerrero");
     }
 
     private void RegistrarUnidadesIniciales()
     {
         UnidadBase[] unidades = FindObjectsByType<UnidadBase>(FindObjectsSortMode.None);
-
         foreach (UnidadBase unidad in unidades)
         {
             bool registrada = tablero.RegistrarUnidad(unidad, unidad.coordenadaInicial.x, unidad.coordenadaInicial.y);
-
             if (registrada)
                 Debug.Log($"Unidad '{unidad.datosDeClase?.nombreClase}' registrada exitosamente en [{unidad.coordenadaInicial.x},{unidad.coordenadaInicial.y}].");
         }
@@ -59,7 +50,6 @@ public class GestorPartida : MonoBehaviour
     void Update()
     {
         if (estadoActual == EstadoJuego.AnimandoAccion || estadoActual == EstadoJuego.FinDePartida) return;
-
         DetectarInput();
     }
 
@@ -74,11 +64,9 @@ public class GestorPartida : MonoBehaviour
         if (Touchscreen.current != null && Touchscreen.current.touches.Count > 0)
         {
             var toque = Touchscreen.current.touches[0];
-
             if (toque.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
             {
                 if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(toque.touchId.ReadValue())) return;
-
                 posicionInput = toque.position.ReadValue();
                 inputDetectado = true;
             }
@@ -87,7 +75,6 @@ public class GestorPartida : MonoBehaviour
         else if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
-
             posicionInput = Mouse.current.position.ReadValue();
             inputDetectado = true;
         }
@@ -97,7 +84,6 @@ public class GestorPartida : MonoBehaviour
         if (inputDetectado)
         {
             Vector2Int coordenadaTocada = ConvertirToqueACoordenada(posicionInput);
-
             if (coordenadaTocada.x != -1) ProcesarToque(coordenadaTocada);
         }
     }
@@ -105,14 +91,12 @@ public class GestorPartida : MonoBehaviour
     private Vector2Int ConvertirToqueACoordenada(Vector3 posicionPantalla)
     {
         Ray rayo = camaraPrincipal.ScreenPointToRay(posicionPantalla);
-
         if (Physics.Raycast(rayo, out RaycastHit impacto))
         {
             Debug.Log($"El ratón golpeó físicamente a: {impacto.collider.gameObject.name}");
 
             // 1. ¿Le dimos directo al Collider del gato?
             UnidadBase gatoTocado = impacto.collider.GetComponentInParent<UnidadBase>();
-
             if (gatoTocado != null)
             {
                 return gatoTocado.coordenadaInicial;
@@ -145,11 +129,7 @@ public class GestorPartida : MonoBehaviour
                     unidadSeleccionada = unidadTocada;
                     coordenadaOrigen = coordenada;
                     faseActual = FaseTurno.UnidadSeleccionada;
-
                     Debug.Log($"<color=green>Seleccionaste a:</color> {unidadTocada.datosDeClase.nombreClase} en [{coordenada.x}, {coordenada.y}]");
-
-                    // --- NUEVO: Actualizamos UI al seleccionar gato ---
-                    ActualizarTextoInstruccion($"Seleccionaste a: {unidadTocada.datosDeClase.nombreClase}. ¿A dónde vas?");
 
                     // --- NUEVO: Mostramos el resaltado ---
                     MostrarResaltadoDeMovimiento(unidadTocada, coordenada.x, coordenada.y);
@@ -157,7 +137,6 @@ public class GestorPartida : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("Ese gato pertenece al enemigo.");
-                    ActualizarTextoInstruccion("¡Ese gato pertenece al enemigo!"); // Aviso visual rápido
                 }
             }
         }
@@ -168,21 +147,16 @@ public class GestorPartida : MonoBehaviour
             {
                 unidadSeleccionada = null;
                 faseActual = FaseTurno.EsperandoSeleccion;
-
-                LimpiarResaltado();
+                LimpiarResaltado(); // --- NUEVO: Limpiamos pantalla ---
                 Debug.Log("Gato deseleccionado.");
-
-                // --- NUEVO: Restaurar texto de turno si se arrepiente ---
-                ActualizarTextoInstruccion($"Turno del Jugador {jugadorActual}: Selecciona tu guerrero");
                 return;
             }
 
             List<Vector2Int> ruta = tablero.IntentarMoverUnidad(coordenadaOrigen.x, coordenadaOrigen.y, coordenada.x, coordenada.y);
-
             if (ruta != null && ruta.Count > 0)
             {
                 estadoActual = EstadoJuego.AnimandoAccion;
-                LimpiarResaltado(); // Limpiamos pantalla porque ya se va a mover
+                LimpiarResaltado(); // --- NUEVO: Limpiamos pantalla porque ya se va a mover ---
 
                 ControladorUnidadVisual visual = unidadSeleccionada.GetComponent<ControladorUnidadVisual>();
                 unidadSeleccionada.coordenadaInicial = coordenada;
@@ -193,21 +167,17 @@ public class GestorPartida : MonoBehaviour
                     StartCoroutine(EsperarMovimientoYCambiarTurno(visual));
                 }
                 else CambiarTurno();
-
                 unidadSeleccionada = null;
             }
-            else
-            {
-                Debug.LogWarning("Movimiento inválido o fuera de rango.");
-                ActualizarTextoInstruccion("Movimiento inválido o fuera de rango.");
-            }
+            else Debug.LogWarning("Movimiento inválido o fuera de rango.");
         }
     }
 
-    // --- MÉTODOS PARA DIBUJAR/BORRAR ---
+    // --- MÉTODOS NUEVOS PARA DIBUJAR/BORRAR ---
     private void MostrarResaltadoDeMovimiento(UnidadBase unidad, int origenX, int origenY)
     {
         if (prefabResaltado == null) return;
+
         List<Vector2Int> validas = tablero.ObtenerMovimientosValidos(unidad, origenX, origenY);
 
         foreach (Vector2Int pos in validas)
@@ -240,19 +210,6 @@ public class GestorPartida : MonoBehaviour
         jugadorActual = (jugadorActual == 1) ? 2 : 1;
         estadoActual = (jugadorActual == 1) ? EstadoJuego.TurnoJugador1 : EstadoJuego.TurnoJugador2;
         faseActual = FaseTurno.EsperandoSeleccion;
-
         Debug.Log($"<color=cyan>--- CAMBIO DE TURNO: Jugador {jugadorActual} ---</color>");
-
-        // --- ACTUALIZADO: Mandamos el cambio de turno a la UI ---
-        ActualizarTextoInstruccion($"Turno del Jugador {jugadorActual}: Selecciona tu guerrero");
-    }
-
-    // --- NUEVO: Método para actualizar la UI fácilmente ---
-    public void ActualizarTextoInstruccion(string mensaje)
-    {
-        if (textoInstrucciones != null)
-        {
-            textoInstrucciones.text = mensaje;
-        }
     }
 }
